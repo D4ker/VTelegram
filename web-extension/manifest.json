@@ -1,0 +1,24 @@
+{
+	"manifest_version":2,
+	"name":"VTelegram",
+	"description":"Exporting your dialogs from VK to Telegram",
+	"version":"1.0",
+	"author":"D4ker",
+	"background": {
+    	"scripts": ["background.js"]
+  	},
+	"content_scripts": [
+		{
+			"matches": ["https://vk.com/*", "http://vk.com/*"],
+			"run_at": "document_end",
+			"css": ["style.css"],
+			"js": ["script.js"]
+		}
+	],
+	"permissions": [
+      	"tabs"
+    ],
+	"icons": {
+		"128":"icons/128x128.png"
+	}
+}
