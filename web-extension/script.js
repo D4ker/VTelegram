@@ -14,6 +14,8 @@ const UPDATE_TABS_MSG = 'updatedURL';
 const VK_MSG_PATH = 'vk.com/im';
 const VK_MSG_ID_PARAM = 'sel';
 
+const CONVERSATION_START_ID = 2000000000;
+
 // Отправка запроса
 async function request(url, method = 'GET', data = null) {
     const headers = {};
@@ -139,7 +141,11 @@ async function createButton() {
         const selID = urlParams.get(VK_MSG_ID_PARAM);
         if (selID) {
             activeButton(exportButton, false);
-            await exportHistory(selID);
+            if (selID[0] === 'c') {
+                await exportHistory(CONVERSATION_START_ID + parseInt(selID.slice(1)));
+            } else {
+                await exportHistory(selID);
+            }
             activeButton(exportButton, true);
         }
     }
