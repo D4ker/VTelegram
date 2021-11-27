@@ -5,13 +5,13 @@
 	"version":"1.0",
 	"author":"D4ker",
 	"background": {
-    	"scripts": ["background.js"]
+    	"scripts": ["app/background.js"]
   	},
 	"content_scripts": [
 		{
 			"matches": ["https://vk.com/*", "http://vk.com/*"],
 			"run_at": "document_end",
-			"js": ["script.js"]
+			"js": ["app/content.js"]
 		}
 	],
 	"permissions": [

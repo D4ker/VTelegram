@@ -1,10 +1,10 @@
-const UPDATE_TABS_MSG = 'updatedURL';
+const constants = require("./constants");
 
 chrome.tabs.onUpdated.addListener(
-    function(tabId, changeInfo, tab) {
+    function (tabId, changeInfo, tab) {
         if (changeInfo.url) {
             chrome.tabs.sendMessage(tabId, {
-                message: UPDATE_TABS_MSG
+                message: constants.UPDATE_TABS_MSG
             });
         }
     }

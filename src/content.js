@@ -1,57 +1,108 @@
 // Расширение для экспорта диалогов из ВК и импорта в Telegram
 
-const requestURL = {
-    'start_history': 'https://vk.com/al_im.php?act=a_start',
-    'history': 'https://vk.com/al_im.php?act=a_history'
-};
+const Iconv = require('iconv').Iconv;
 
-// Сколько сообщений приходит в самом начале
-const START_MSG_CHUNK = 30;
-// Сколько сообщений приходит за запрос
-const MSG_CHUNK = 100;
+const Constants = require('./constants');
+const Lib = require('./lib');
 
-const UPDATE_TABS_MSG = 'updatedURL';
-const VK_MSG_PATH = 'vk.com/im';
-const VK_MSG_ID_PARAM = 'sel';
+// Глобальные переменные
+var gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
+var gImportedText = ''; // текст для импорта в Телеграм
 
-const CONVERSATION_START_ID = 2000000000;
+function exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
+    const mediaCount = parseInt(msgMediaData['attach_count'], 10);
+    const mediaElementsDocBlock = vkDoc.getElementsByClassName(`_im_msg_media${msgId}`)[0];
+    const mediaElements = mediaElementsBlock.getElementsByTagName('a')
 
-// Отправка запроса
-async function request(url, method = 'GET', data = null) {
-    const headers = {};
-    let body;
-    if (data) {
-        headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        headers['x-requested-with'] = 'XMLHttpRequest';
-        body = JSON.stringify(data);
+    for (let i = 1; i <= mediaCount; i++) {
+        const currentAttachKey = `attach${i}_type`;
+
+        if (msgMediaData.hasOwnProperty(currentAttachKey)) {
+            const mediaType = msgMediaData[currentMediaKey]
+
+            for (let media of mediaElements) {
+                if (media.getAttribute('data-photo-id')) {
+                    console.log(media);
+                }
+            }
+
+        } else {
+            break;
+        }
     }
 
-    const response = await fetch(url, {
-        method: method,
-        headers: headers,
-        body: body
-    });
+    gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
+}
 
-    return response;
+function exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
+
+}
+
+function exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
+
 }
 
 // Функция для отправки запросов телеграм-боту
-function sendData(data) {
-    console.log(data);
+function sendData(dataJSON, dataHTML) {
+    for (let key in dataJSON) {
+        const msgData = dataJSON[key];
+
+        const msgId = msgData[0]; // id сообщения
+        const msgSender = msgData[2]; // id отправителя
+        const msgDateTime = Lib.formatTime(msgData[3]); // время отправки сообщения
+        const msgText = msgData[4]; // текст сообщения
+        const msgMediaData = msgData[5]; // текст сообщения
+
+        if (msgText) {
+            gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
+        }
+
+        /*if (msgMediaData.hasOwnProperty('attach_count')) {
+            const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
+            if (gMediaExportMode == EXPORT_MEDIA_URL_MODE) {
+                exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
+            } else if (gMediaExportMode == EXPORT_MEDIA_CLOUD_MODE) {
+                exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
+            } else if (gMediaExportMode == EXPORT_MEDIA_BOT_MODE) {
+                exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
+            }
+        }*/
+    }
+
+    console.log(gImportedText);
     // Код для отправки данных
+}
+
+// Function to download data to a file
+function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
 }
 
 // Функция для получения блока сообщений
 async function sendHistoryPart(peer, offset) {
     const offsetData = `act=a_history&al=1&gid=0&im_v=3` +
         `&offset=${offset}&peer=${peer}&toend=0&whole=0`;
-    const result = await request(requestURL['history'], 'POST', offsetData);
+    const result = await Lib.request(Constants.requestURL['history'], 'POST', offsetData);
     if (result.ok) {
         const jsonOffsetData = await result.json();
         const currentData = jsonOffsetData['payload'][1][1];
         // Мы не можем наверняка знать, сколько сообщений было удалено пользователями
         if (Object.keys(currentData).length) {
-            sendData(currentData);
+            sendData(currentData, jsonOffsetData['payload'][1][0]);
         }
     }
 }
@@ -61,30 +112,30 @@ async function exportHistory(peer) {
     // Получение первого сообщения с основной информацией
     const startData = `act=a_start&al=1&block=true&gid=0&history=1&im_v=3` +
         `&msgid=false&peer=${peer}&prevpeer=0`;
-    const result = await request(requestURL['start_history'], 'POST', startData);
+    const result = await Lib.request(Constants.requestURL['start_history'], 'POST', startData);
     if (result.ok) {
         const jsonStartData = await result.json();
 
         // Число сообщений, отправленных в ьеседу за все время (вместе с удаленными)
         const countOfMsgs = jsonStartData['payload'][1][0]['lastmsg_meta'][8];
 
-        const remainder = countOfMsgs % MSG_CHUNK;
-        let startOffset = countOfMsgs - remainder + START_MSG_CHUNK;
-        if (remainder <= START_MSG_CHUNK) {
-            startOffset -= MSG_CHUNK;
+        const remainder = countOfMsgs % Constants.MSG_CHUNK;
+        let startOffset = countOfMsgs - remainder + Constants.START_MSG_CHUNK;
+        if (remainder <= Constants.START_MSG_CHUNK) {
+            startOffset -= Constants.MSG_CHUNK;
         }
 
-        for (let currentOffset = startOffset; currentOffset >= START_MSG_CHUNK; currentOffset -= MSG_CHUNK) {
+        for (let currentOffset = startOffset; currentOffset >= Constants.START_MSG_CHUNK; currentOffset -= Constants.MSG_CHUNK) {
             await sendHistoryPart(peer, currentOffset);
         }
 
-        await sendData(jsonStartData['payload'][1][0]['msgs']);
+        await sendData(jsonStartData['payload'][1][0]['msgs'], jsonStartData['payload'][1][0]['history']);
     }
 }
 
 // Функция, делающая кнопку экспорта видимой только когда пользователь в беседе
 function showButton() {
-    if (location.host + location.pathname === VK_MSG_PATH) {
+    if (location.host + location.pathname === Constants.VK_MSG_PATH) {
         let exportButton = document.getElementById('ui_rmenu_export_div_vt');
         if (!exportButton) {
             createButton();
@@ -92,7 +143,7 @@ function showButton() {
         }
 
         const urlParams = new URLSearchParams(location.search);
-        if (urlParams.get(VK_MSG_ID_PARAM)) {
+        if (urlParams.get(Constants.VK_MSG_ID_PARAM)) {
             exportButton.style.display = 'block';
         } else {
             exportButton.style.display = 'none';
@@ -138,14 +189,15 @@ async function createButton() {
     // При нажатии на кнопку экспортировать историю
     exportButton.onclick = async function fun() {
         const urlParams = new URLSearchParams(location.search);
-        const selID = urlParams.get(VK_MSG_ID_PARAM);
+        const selID = urlParams.get(Constants.VK_MSG_ID_PARAM);
         if (selID) {
             activeButton(exportButton, false);
             if (selID[0] === 'c') {
-                await exportHistory(CONVERSATION_START_ID + parseInt(selID.slice(1)));
+                await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
             } else {
                 await exportHistory(selID);
             }
+            download(gImportedText, 'console.txt', 'text/plain');
             activeButton(exportButton, true);
         }
     }
@@ -155,7 +207,7 @@ async function createButton() {
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // listen for messages sent from background.js
-        if (request.message === UPDATE_TABS_MSG) {
+        if (request.message === Constants.UPDATE_TABS_MSG) {
             showButton();
         }
     }
