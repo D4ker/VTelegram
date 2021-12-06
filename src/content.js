@@ -4,6 +4,9 @@
 const Constants = require('./constants');
 const Lib = require('./lib');
 
+const TgLib = require('./tg_lib');
+const {interface} = require("./tg_lib");
+
 // Глобальные переменные
 var gSenders = {}; // список людей, состоящих в беседе
 var gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
@@ -108,7 +111,7 @@ function setSendersDataList(senders) {
     for (let sender in senders) {
         gSenders[senders[sender].id] = {
             name: senders[sender].name,
-            photo: senders[sender].photo,
+            photo: senders[sender].photo
         };
     }
 }
@@ -124,7 +127,7 @@ function addSenderDataToList(dataHTML, senderId) {
                 .getElementsByTagName('img')[0];
             const senderData = {
                 name: senderDataElement.getAttribute('alt'),
-                photo: senderDataElement.getAttribute('src'),
+                photo: senderDataElement.getAttribute('src')
             };
             gLeftSenders[senderId] = senderData;
             gSenders[senderId] = senderData;
@@ -173,26 +176,6 @@ function sendData(dataJSON, dataHTML) {
     console.log(gImportedText);
     // console.log(gLeftSenders);
     // Код для отправки данных
-}
-
-// Function to download data to a file
-function download(data, filename, type) {
-    var file = new Blob([data], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        var a = document.createElement("a"),
-            url = URL.createObjectURL(file);
-        console.log('FILE URL = ' + url);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function () {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
-    }
 }
 
 // Функция для получения блока сообщений
@@ -271,6 +254,26 @@ function activeButton(button, state) {
     }
 }
 
+// Function to download data to a file
+function createFile(data, filename, type) {
+    let file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        let a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+        console.log('FILE URL = ' + url);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 0);
+    }
+}
+
 // Функция для создания кнопки экспорта
 async function createButton() {
     const divElement = document.createElement('div');
@@ -305,7 +308,8 @@ async function createButton() {
             } else {
                 await exportHistory(selID);
             }
-            download(gImportedText, 'console.txt', 'text/plain');
+            createFile(gImportedText, 'console.txt', 'text/plain');
+            await TgLib.interface();
             activeButton(exportButton, true);
         }
     }
