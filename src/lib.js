@@ -1,3 +1,10 @@
+function transformWindows1251ToUTF8(response) {
+    const transformedBody = response.body
+        .pipeThrough(new TextDecoderStream("windows-1251"))
+        .pipeThrough(new TextEncoderStream());
+    return new Response(transformedBody);
+}
+
 // Отправка запроса
 export async function request(url, method = 'GET', data = null) {
     const headers = {};
@@ -14,7 +21,7 @@ export async function request(url, method = 'GET', data = null) {
         body: body
     });
 
-    return response;
+    return transformWindows1251ToUTF8(response);
 }
 
 // Функция для форматирования даты

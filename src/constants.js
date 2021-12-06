@@ -19,9 +19,10 @@ export const EXPORT_MEDIA_URL_MODE = 0;
 export const EXPORT_MEDIA_CLOUD_MODE = 1;
 export const EXPORT_MEDIA_BOT_MODE = 2;
 
-export const MEDIA_TYPE_PHOTO = 'photo';
-export const MEDIA_TYPE_VIDEO = 'video';
-export const MEDIA_TYPE_DOC = 'doc';
-export const MEDIA_TYPE_AUDIO = 'audio';
+export const MEDIA_PREFIX = 'vk.com';
 
-export const MEDIA_KIND_AUDIOMSG = 'audiomsg'; // голосовое сообщение (тип медиа - doc)
+export const docTypes = [
+    'page_doc_title', // документ (в том числе видео-документ)
+    'page_post_thumb_unsized', // фото-документ
+    'page_doc_photo_href', // гифка
+];

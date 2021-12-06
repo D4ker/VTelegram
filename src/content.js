@@ -1,37 +1,98 @@
 // Расширение для экспорта диалогов из ВК и импорта в Telegram
 
-const Iconv = require('iconv').Iconv;
 
 const Constants = require('./constants');
 const Lib = require('./lib');
 
 // Глобальные переменные
+var gSenders = {}; // список людей, состоящих в беседе
+var gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
 var gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
 var gImportedText = ''; // текст для импорта в Телеграм
 
-function exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
-    const mediaCount = parseInt(msgMediaData['attach_count'], 10);
+// Какие медиа необходимо скачать
+var gExportPhotos = true;
+var gExportVideos = true;
+var gExportDocs = true;
+var gExportAudios = true;
+var gExportWallPosts = true;
+var gExportAudiomsgs = true;
+
+function updateGlobalVars() {
+    gSenders = {}; // список людей, состоящих в беседе
+    gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
+    gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
+    gImportedText = ''; // текст для импорта в Телеграм
+}
+
+function getDirectUrl(url) {
+    return url;
+}
+
+function getMediaUrls(msgId, msgMediaData, vkDoc) {
     const mediaElementsDocBlock = vkDoc.getElementsByClassName(`_im_msg_media${msgId}`)[0];
-    const mediaElements = mediaElementsBlock.getElementsByTagName('a')
 
-    for (let i = 1; i <= mediaCount; i++) {
-        const currentAttachKey = `attach${i}_type`;
+    if (mediaElementsDocBlock === undefined) {
+        return {};
+    }
 
-        if (msgMediaData.hasOwnProperty(currentAttachKey)) {
-            const mediaType = msgMediaData[currentMediaKey]
+    const mediaElements = mediaElementsDocBlock.getElementsByTagName('a');
+    const audiomsgsElements = mediaElementsDocBlock.getElementsByClassName('audio-msg-track clear_fix');
 
-            for (let media of mediaElements) {
-                if (media.getAttribute('data-photo-id')) {
-                    console.log(media);
+    const mediaObj = {
+        photos: [],
+        videos: [],
+        docs: [],
+        audiomsgs: [],
+        audios: [],
+        wall_posts: []
+    };
+
+    for (let media of mediaElements) {
+        if (media.getAttribute('data-photo-id')) { // фото
+            const photoObj = JSON.parse(`${media.getAttribute('onclick').match(`"temp":({.*?})`)[1]}`);
+            let max = -1;
+            let photoUrl = '';
+            for (let photo in photoObj) {
+                if (photo[1] === '_') {
+                    const photoWidth = parseInt(photoObj[photo][1], 10);
+                    const photoHeight = parseInt(photoObj[photo][2], 10);
+                    const photoSize = photoWidth * photoHeight;
+                    if (photoSize > max) {
+                        max = photoSize;
+                        photoUrl = photoObj[photo][0];
+                    }
                 }
             }
+            mediaObj.photos.push(photoUrl);
+        } else if (media.getAttribute('data-video')) { // видео
 
-        } else {
-            break;
+            // mediaObj.videos.push();
+        } else if (Constants.docTypes.indexOf(media.getAttribute('class')) !== -1) { // документы
+            const url = getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
+            mediaObj.docs.push(url);
+        } else if (media.getAttribute('class') === 'post_link') { // посты из групп
+            const url = Constants.MEDIA_PREFIX + media.getAttribute('href');
+            mediaObj.wall_posts.push(url);
+        } else if (media.getAttribute('audio')) { // аудио (музыка)
+            // mediaObj.audios.push();
         }
     }
 
-    gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
+    for (let audiomsg of audiomsgsElements) { // аудиосообщения
+        mediaObj.audiomsgs.push(audiomsg.getAttribute('data-mp3'));
+    }
+
+    return mediaObj;
+}
+
+function exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
+    const mediaObj = getMediaUrls(msgId, msgMediaData, vkDoc);
+    for (let media in mediaObj) {
+        for (let url of mediaObj[media]) {
+            gImportedText += `${msgDateTime} - ${msgSender}: <${media}> ::: ${url}\n`;
+        }
+    }
 }
 
 function exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
@@ -42,34 +103,75 @@ function exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
 
 }
 
+// Функция для получения списка людей, состоящих в беседе
+function setSendersDataList(senders) {
+    for (let sender in senders) {
+        gSenders[senders[sender].id] = {
+            name: senders[sender].name,
+            photo: senders[sender].photo,
+        };
+    }
+}
+
+// Функция для добавления в список людей, состоящих в беседе, удаленные из нее аккаунты
+function addSenderDataToList(dataHTML, senderId) {
+    const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
+    const msgElementsDocBlock = vkDoc.getElementsByClassName('im-mess-stack _im_mess_stack');
+    for (let msgElement of msgElementsDocBlock) {
+        if (msgElement.getAttribute('data-peer') === `${senderId}`) {
+            const senderDataElement = msgElement
+                .getElementsByClassName('nim-peer--photo')[0]
+                .getElementsByTagName('img')[0];
+            const senderData = {
+                name: senderDataElement.getAttribute('alt'),
+                photo: senderDataElement.getAttribute('src'),
+            };
+            gLeftSenders[senderId] = senderData;
+            gSenders[senderId] = senderData;
+            return;
+        }
+    }
+}
+
+// Функция для обработки отступов, эмодзи и т.д. в сообщениях
+function getFormatMsg(msg) {
+    return msg;
+}
+
 // Функция для отправки запросов телеграм-боту
 function sendData(dataJSON, dataHTML) {
     for (let key in dataJSON) {
         const msgData = dataJSON[key];
 
+        const senderId = msgData[5].hasOwnProperty('from') ? msgData[5].from : msgData[2];
+        if (gSenders[senderId] === undefined) {
+            addSenderDataToList(dataHTML, senderId);
+        }
+
         const msgId = msgData[0]; // id сообщения
-        const msgSender = msgData[2]; // id отправителя
+        const msgSender = gSenders[senderId].name; // имя отправителя
         const msgDateTime = Lib.formatTime(msgData[3]); // время отправки сообщения
-        const msgText = msgData[4]; // текст сообщения
-        const msgMediaData = msgData[5]; // текст сообщения
+        const msgText = getFormatMsg(msgData[4]); // текст сообщения
+        const msgMediaData = msgData[5]; // медиа-данные сообщения
 
         if (msgText) {
             gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
         }
 
-        /*if (msgMediaData.hasOwnProperty('attach_count')) {
+        if (msgMediaData.hasOwnProperty('attach_count')) {
             const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
-            if (gMediaExportMode == EXPORT_MEDIA_URL_MODE) {
+            if (gMediaExportMode === Constants.EXPORT_MEDIA_URL_MODE) {
                 exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
-            } else if (gMediaExportMode == EXPORT_MEDIA_CLOUD_MODE) {
+            } else if (gMediaExportMode === Constants.EXPORT_MEDIA_CLOUD_MODE) {
                 exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
-            } else if (gMediaExportMode == EXPORT_MEDIA_BOT_MODE) {
+            } else if (gMediaExportMode === Constants.EXPORT_MEDIA_BOT_MODE) {
                 exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
             }
-        }*/
+        }
     }
 
     console.log(gImportedText);
+    // console.log(gLeftSenders);
     // Код для отправки данных
 }
 
@@ -81,11 +183,12 @@ function download(data, filename, type) {
     else { // Others
         var a = document.createElement("a"),
             url = URL.createObjectURL(file);
+        console.log('FILE URL = ' + url);
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }, 0);
@@ -109,12 +212,17 @@ async function sendHistoryPart(peer, offset) {
 
 // Функция для получения всей истории переписки
 async function exportHistory(peer) {
+    updateGlobalVars(); // обнуляем глобальные переменные
+
     // Получение первого сообщения с основной информацией
     const startData = `act=a_start&al=1&block=true&gid=0&history=1&im_v=3` +
         `&msgid=false&peer=${peer}&prevpeer=0`;
     const result = await Lib.request(Constants.requestURL['start_history'], 'POST', startData);
     if (result.ok) {
         const jsonStartData = await result.json();
+
+        // Получаем список людей, состоящих в беседе
+        setSendersDataList(jsonStartData['payload'][1][1]);
 
         // Число сообщений, отправленных в ьеседу за все время (вместе с удаленными)
         const countOfMsgs = jsonStartData['payload'][1][0]['lastmsg_meta'][8];
@@ -205,7 +313,7 @@ async function createButton() {
 
 // Встраиваем кнопку, если в ссылке есть параметр sel
 chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
+    function (request, sender, sendResponse) {
         // listen for messages sent from background.js
         if (request.message === Constants.UPDATE_TABS_MSG) {
             showButton();
