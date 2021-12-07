@@ -4,8 +4,7 @@
 const Constants = require('./constants');
 const Lib = require('./lib');
 
-const TgLib = require('./tg_lib');
-const {interface} = require("./tg_lib");
+// const TgLib = require('./tg_lib');
 
 // Глобальные переменные
 var gSenders = {}; // список людей, состоящих в беседе
@@ -146,7 +145,15 @@ function sendData(dataJSON, dataHTML) {
     for (let key in dataJSON) {
         const msgData = dataJSON[key];
 
-        const senderId = msgData[5].hasOwnProperty('from') ? msgData[5].from : msgData[2];
+        let senderId = 0;
+        if (msgData[5].hasOwnProperty('from')) {
+            senderId = msgData[5].from;
+        } else if (msgData[5].hasOwnProperty('oaid')) {
+            senderId = msgData[5].oaid;
+        } else {
+            senderId = msgData[2];
+        }
+
         if (gSenders[senderId] === undefined) {
             addSenderDataToList(dataHTML, senderId);
         }
@@ -180,8 +187,16 @@ function sendData(dataJSON, dataHTML) {
 
 // Функция для получения блока сообщений
 async function sendHistoryPart(peer, offset) {
-    const offsetData = `act=a_history&al=1&gid=0&im_v=3` +
-        `&offset=${offset}&peer=${peer}&toend=0&whole=0`;
+    const offsetData = Lib.toUrlData({
+        act: 'a_history',
+        al: 1,
+        gid: 0,
+        im_v: 3,
+        offset: offset,
+        peer: peer,
+        toend: 0,
+        whole: 0
+    });
     const result = await Lib.request(Constants.requestURL['history'], 'POST', offsetData);
     if (result.ok) {
         const jsonOffsetData = await result.json();
@@ -198,8 +213,17 @@ async function exportHistory(peer) {
     updateGlobalVars(); // обнуляем глобальные переменные
 
     // Получение первого сообщения с основной информацией
-    const startData = `act=a_start&al=1&block=true&gid=0&history=1&im_v=3` +
-        `&msgid=false&peer=${peer}&prevpeer=0`;
+    const startData = Lib.toUrlData({
+        act: 'a_start',
+        al: 1,
+        block: true,
+        gid: 0,
+        history: 1,
+        im_v: 3,
+        msgid: false,
+        peer: peer,
+        prevpeer: 0
+    });
     const result = await Lib.request(Constants.requestURL['start_history'], 'POST', startData);
     if (result.ok) {
         const jsonStartData = await result.json();
@@ -262,7 +286,6 @@ function createFile(data, filename, type) {
     else { // Others
         let a = document.createElement("a"),
             url = URL.createObjectURL(file);
-        console.log('FILE URL = ' + url);
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
@@ -309,7 +332,7 @@ async function createButton() {
                 await exportHistory(selID);
             }
             createFile(gImportedText, 'console.txt', 'text/plain');
-            await TgLib.runInterface();
+            // await TgLib.runInterface();
             activeButton(exportButton, true);
         }
     }
