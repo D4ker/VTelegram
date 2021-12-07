@@ -37,3 +37,16 @@ export function formatTime(s) {
     });
     return dtFormat.format(new Date(s * 1e3));
 }
+
+// Функция для преобразования JSON в UrlParams (для запросов)
+export function toUrlData(obj) {
+    const data = [];
+    for (const key in obj) {
+        let value = obj[key];
+        if (typeof obj[key] === 'object') {
+            value = JSON.stringify(obj[key]);
+        }
+        data.push([key, value]);
+    }
+    return new URLSearchParams(data).toString();
+}

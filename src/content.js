@@ -309,7 +309,7 @@ async function createButton() {
                 await exportHistory(selID);
             }
             createFile(gImportedText, 'console.txt', 'text/plain');
-            await TgLib.interface();
+            await TgLib.runInterface();
             activeButton(exportButton, true);
         }
     }

@@ -56,6 +56,6 @@ export async function authorize() {
     }
 }
 
-export async function interface() {
+export async function runInterface() {
     await authorize();
 }
