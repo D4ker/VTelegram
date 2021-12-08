@@ -4,7 +4,7 @@
 const Constants = require('./constants');
 const Lib = require('./lib');
 
-// const TgLib = require('./tg_lib');
+const TgLib = require('./tg_lib');
 
 // Глобальные переменные
 var gSenders = {}; // список людей, состоящих в беседе
@@ -180,7 +180,7 @@ function sendData(dataJSON, dataHTML) {
         }
     }
 
-    console.log(gImportedText);
+    // console.log(gImportedText);
     // console.log(gLeftSenders);
     // Код для отправки данных
 }
@@ -278,25 +278,6 @@ function activeButton(button, state) {
     }
 }
 
-// Function to download data to a file
-function createFile(data, filename, type) {
-    let file = new Blob([data], {type: type});
-    if (window.navigator.msSaveOrOpenBlob) // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    else { // Others
-        let a = document.createElement("a"),
-            url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function () {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
-    }
-}
-
 // Функция для создания кнопки экспорта
 async function createButton() {
     const divElement = document.createElement('div');
@@ -331,8 +312,8 @@ async function createButton() {
             } else {
                 await exportHistory(selID);
             }
-            createFile(gImportedText, 'console.txt', 'text/plain');
-            // await TgLib.runInterface();
+            // Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+            await TgLib.runInterface(gImportedText);
             activeButton(exportButton, true);
         }
     }

@@ -2,7 +2,7 @@
 
 // методы для взаимодействия c Tg API
 const MTProto = require('@mtproto/core/envs/browser');
-const { sleep } = require('@mtproto/core/src/utils/common');
+const {sleep} = require('@mtproto/core/src/utils/common');
 
 // API обработчик ошибок
 class API {
@@ -21,7 +21,7 @@ class API {
         } catch (error) {
             console.log(`${method} error:`, error);
 
-            const { error_code, error_message } = error;
+            const {error_code, error_message} = error;
 
             if (error_code === 420) {
                 const seconds = Number(error_message.split('FLOOD_WAIT_')[1]);
@@ -42,7 +42,7 @@ class API {
                 if (type === 'PHONE') {
                     await this.mtproto.setDefaultDc(dcId);
                 } else {
-                    Object.assign(options, { dcId });
+                    Object.assign(options, {dcId});
                 }
 
                 return this.call(method, params, options);
@@ -79,7 +79,7 @@ export function sendCode(phone) {
     });
 }
 
-export function signIn({ code, phone, phone_code_hash }) {
+export function signIn({code, phone, phone_code_hash}) {
     return api.call('auth.signIn', {
         phone_code: code,
         phone_number: phone,
@@ -91,7 +91,7 @@ export function getPassword() {
     return api.call('account.getPassword');
 }
 
-export function checkPassword({ srp_id, A, M1 }) {
+export function checkPassword({srp_id, A, M1}) {
     return api.call('auth.checkPassword', {
         password: {
             _: 'inputCheckPasswordSRP',
