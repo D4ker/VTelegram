@@ -3,7 +3,6 @@ const TgCore = require('./tg_core');
 
 const CryptoJS = require('crypto-js');
 
-// Код Влада
 // процесс авторизации
 export async function authorize() {
     const user = await TgCore.getUser();
@@ -58,7 +57,6 @@ export async function authorize() {
     }
 }
 
-// Код Саши
 export async function runInterface(fileText) {
     await authorize();
 

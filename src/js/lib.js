@@ -68,13 +68,6 @@ export function createFile(data, filename, type) {
             window.URL.revokeObjectURL(url);
         }, 0);
     }
-    let fileReader = new FileReader();
-
-    fileReader.readAsArrayBuffer(file);
-    fileReader.onload = function (ev) {
-        const result = fileReader.result;
-        console.log(result);
-    }
 }
 
 export function toUTF8Array(str) {
