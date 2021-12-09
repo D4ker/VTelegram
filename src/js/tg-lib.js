@@ -1,5 +1,5 @@
 const Lib = require('./lib');
-const TgCore = require('./tg_core');
+const TgCore = require('./tg-core');
 
 const CryptoJS = require('crypto-js');
 

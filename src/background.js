@@ -1,4 +1,4 @@
-const Constants = require("./constants");
+const Constants = require("./js/constants");
 
 chrome.tabs.onUpdated.addListener(
     function (tabId, changeInfo, tab) {

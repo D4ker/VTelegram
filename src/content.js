@@ -1,24 +1,24 @@
 // Расширение для экспорта диалогов из ВК и импорта в Telegram
 
 
-const Constants = require('./constants');
-const Lib = require('./lib');
+const Constants = require('./js/constants');
+const Lib = require('./js/lib');
 
-const TgLib = require('./tg_lib');
+const TgLib = require('./js/tg-lib');
 
 // Глобальные переменные
-var gSenders = {}; // список людей, состоящих в беседе
-var gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
-var gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
-var gImportedText = ''; // текст для импорта в Телеграм
+let gSenders = {}; // список людей, состоящих в беседе
+let gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
+let gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
+let gImportedText = ''; // текст для импорта в Телеграм
 
 // Какие медиа необходимо скачать
-var gExportPhotos = true;
-var gExportVideos = true;
-var gExportDocs = true;
-var gExportAudios = true;
-var gExportWallPosts = true;
-var gExportAudiomsgs = true;
+let gExportPhotos = true;
+let gExportVideos = true;
+let gExportDocs = true;
+let gExportAudios = true;
+let gExportWallPosts = true;
+let gExportAudiomsgs = true;
 
 function updateGlobalVars() {
     gSenders = {}; // список людей, состоящих в беседе
@@ -312,8 +312,8 @@ async function createButton() {
             } else {
                 await exportHistory(selID);
             }
-            // Lib.createFile(gImportedText, 'file.txt', 'plain/text');
-            await TgLib.runInterface(gImportedText);
+            Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+            // await TgLib.runInterface(gImportedText);
             activeButton(exportButton, true);
         }
     }

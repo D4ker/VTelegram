@@ -18,6 +18,6 @@
       	"tabs"
     ],
 	"icons": {
-		"128":"icons/128x128.png"
+		"128":"res/icons/icon128.png"
 	}
 }

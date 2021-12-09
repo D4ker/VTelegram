@@ -1,5 +1,3 @@
-// Код Влада
-
 // методы для взаимодействия c Tg API
 const MTProto = require('@mtproto/core/envs/browser');
 const {sleep} = require('@mtproto/core/src/utils/common');
