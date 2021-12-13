@@ -1,4 +1,4 @@
-const Emitter = require('./event_emitter').default;
+const Emitter = require('./event-emitter').default;
 const Constants = require('./../constants');
 const Errors = Constants.errors;
 const Lib = require('./../lib');
@@ -12,7 +12,7 @@ class PeopleImport {
     _usersLoaded = false;
     
     constructor() {
-        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/people_import_form.html'))
+        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/people-import-form.html'))
             .then(response => { return response.text() })
             .then((data) => {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');

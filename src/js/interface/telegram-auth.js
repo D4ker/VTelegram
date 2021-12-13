@@ -1,4 +1,4 @@
-const Emitter = require('./event_emitter').default;
+const Emitter = require('./event-emitter').default;
 
 const Errors = require('./../constants').errors;
 
@@ -9,7 +9,7 @@ class TelegramAuth {
     _formInsertionPromise = undefined;
     
     constructor() {
-        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/telegram_auth_form.html'))
+        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/telegram-auth-form.html'))
             .then(response => { return response.text(); })
             .then(data => {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');

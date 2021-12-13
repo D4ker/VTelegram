@@ -1,4 +1,4 @@
-const Emitter = require('./event_emitter').default;
+const Emitter = require('./event-emitter').default;
 
 const startImport = new StartImport();
 export default startImport;
@@ -8,7 +8,7 @@ class StartImport {
     _formInsertionPromise = undefined;
     
     constructor() {
-        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/start_import_form.html'))
+        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/start-import-form.html'))
             .then(response => { return response.text(); })
             .then(data => {
                 var formDom = new DOMParser().parseFromString(data, 'text/html'); 

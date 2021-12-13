@@ -1,4 +1,4 @@
-const Emitter = require('./event_emitter').default;
+const Emitter = require('./event-emitter').default;
 const Errors = require('./../constants').errors;
 
 const mainForm = new MainForm();
@@ -15,7 +15,7 @@ class MainForm
     
     constructor()
     {
-        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/main_form.html'))
+        this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/main-form.html'))
             .then(response => { return response.text() })
             .then(data => {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');
@@ -23,7 +23,7 @@ class MainForm
                 document.getElementById('box_layer').appendChild(formDom.body.firstElementChild);
             })
             .then(() => {
-                this._telegramAuth = require('./telegram_auth').default;
+                this._telegramAuth = require('./telegram-auth').default;
 
                 Emitter.subscribe('event:auth-completed', data => {
                     this.hideBody();
@@ -40,7 +40,7 @@ class MainForm
                     this._telegramAuth.show();
                 });
                 
-                this._peopleImport = require('./people_import').default;
+                this._peopleImport = require('./people-import').default;
                 Emitter.subscribe('event:people-import-completed', data => {
                     this.hideBody();
                     this._startImport.show();
@@ -50,7 +50,7 @@ class MainForm
                     this._settings.show();
                 });
                 
-                this._startImport = require('./start_import').default;
+                this._startImport = require('./start-import').default;
                 Emitter.subscribe('event:start-import', data => {
                     //!!!!!!! здесь берем все данные и начинаем импорт
                     this.close();

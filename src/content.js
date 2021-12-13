@@ -6,7 +6,7 @@ const Lib = require('./js/lib');
 
 const TgLib = require('./js/tg-lib');
 
-const MainForm = require('./js/interface/main_form').default;
+const MainForm = require('./js/interface/main-form').default;
 
 // Глобальные переменные
 let gSenders = {}; // список людей, состоящих в беседе
