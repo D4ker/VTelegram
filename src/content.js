@@ -6,6 +6,8 @@ const Lib = require('./js/lib');
 
 const TgLib = require('./js/tg-lib');
 
+const MainForm = require('./js/interface/main_form').default;
+
 // Глобальные переменные
 let gSenders = {}; // список людей, состоящих в беседе
 let gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
@@ -307,12 +309,13 @@ async function createButton() {
         const selID = urlParams.get(Constants.VK_MSG_ID_PARAM);
         if (selID) {
             activeButton(exportButton, false);
-            if (selID[0] === 'c') {
-                await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
-            } else {
-                await exportHistory(selID);
-            }
-            Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+            MainForm.show();
+//             if (selID[0] === 'c') {
+//                 await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
+//             } else {
+//                 await exportHistory(selID);
+//             }
+//             Lib.createFile(gImportedText, 'file.txt', 'plain/text');
             // await TgLib.runInterface(gImportedText);
             activeButton(exportButton, true);
         }

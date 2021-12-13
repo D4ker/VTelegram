@@ -1,0 +1,435 @@
+.vtelegram_container.hidden
+{
+    display: none;
+}
+
+.vtelegram_container
+{
+    display: block;
+}
+
+.vtelegram_box.hidden
+{
+    display: none;
+}
+
+.vtelegram_box
+{
+    display: block;
+}
+
+[dir=ltr]
+.vtelegram_validation_img
+{
+    background: url('chrome-extension://jhponoknfgpnkbdgofngcogaginpjkoe/res/images/finish_f.png') no-repeat 0 0;
+}
+
+[dir]
+.vtelegram_validation_img
+{
+    margin: 0 auto 25px;
+}
+
+.vtelegram_validation_img
+{
+    width: 160px;
+    height: 160px;
+}
+
+[dir=ltr]
+.vtelegram_import_start_img
+{
+   background: url('chrome-extension://jhponoknfgpnkbdgofngcogaginpjkoe/res/images/chan.gif') no-repeat center;  
+   background-size: 160px, 160px;
+}
+
+[dir]
+.vtelegram_import_start_img
+{
+    margin: 0 auto 25px;
+}
+
+.vtelegram_import_start_img
+{
+    width: 160px;
+    height: 160px;
+}
+
+[dir]
+.vtelegram_validation_text
+{
+    margin: 20px 0;
+    text-align: center;
+}
+
+[dir]
+.vtelegram_validation_other_phone
+{
+    margin: 8px 0 0 0;
+}
+
+.vtelegram_validation_other_phone
+{
+    font-size: 12.5px;
+    display: block;
+}
+    
+[dir]
+.vtelegram_validation_row
+{
+    margin: 0 auto 10px;
+}
+
+.vtelegram_validation_row
+{
+    width: 200px;
+}
+
+[dir]
+.vtelegram_validation_submit_row
+{
+    margin: 10px auto 0;
+}
+
+.vtelegram_validation_submit_row
+{
+    width: 200px;
+}
+
+[dir]
+.vtelegram_validation_skip
+{
+    padding-top: 10px;
+    text-align: center;
+}
+
+[dir]
+.vtelegram_validation_no_code
+{
+    padding-top: 10px;
+    text-align: center;
+}
+
+.vtelegram_validation_no_code
+{
+    color: var(--gray_600);
+    font-size: 12.5px;
+}
+
+
+[dir]
+input.vtelegram_validation_readonly
+{
+    background-color: #E8F0FE !important;
+    border-color: #d3d9de;
+    color: #828282;
+/*    -webkit-text-fill-color: #828282;
+    -webkit-opacity: 1;*/
+}
+
+[dir=ltr]
+.vtelegram_msg
+{
+    margin: 0px;
+    padding: 0px;
+}
+    
+
+/*[dir] .vtelegram_page_block:last-child
+{
+    margin-bottom: 15px;
+}
+
+[dir]
+.vtelegram_page_block
+{
+    background: #ffffff;
+    */
+    
+[dir]
+.settings_row_hint
+{
+    padding-top: 6px;
+}
+
+[dir=ltr]
+.vtelegram_settings_line.unfolded
+{
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+[dir]
+.vtelegram_settings_line.unfolded
+{
+    background-color: #fafbfc;
+    margin: 0px -25px;
+    border-top: 1px solid #dce1e6;
+    cursor: default;
+}
+
+[dir]
+.vtelegram_settings_line[onclick]
+{
+    cursor: pointer;
+}
+
+[dir]
+.vtelegram_settings_line~.vtelegram_settings_line
+{
+    margin: 0;
+}
+
+[dir]
+.vtelegram_settings_line
+{
+    margin: 0;
+    padding: 15px 0 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.vtelegram_settings_line.unfolded
+.vtelegram_settings_info_block
+{
+    display: none;
+}
+
+.vtelegram_settings_info_block
+{
+    line-height: 16px;
+}
+
+[dir=ltr]
+.vtelegram_settings_label
+{
+    padding: 6px 10px 6px 0;
+    float: left;
+}
+
+.vtelegram_settings_label
+{
+    color: #626d7a;
+    width: 145px;
+    line-height: 16px;
+}
+
+[dir=ltr]
+.vtelegram_settings_right_control
+{
+    float: right;
+}
+
+[dir]
+.vtelegram_settings_right_control
+{
+    padding: 6px 0 0 0;
+}
+
+.vtelegram_settings_tabindex_link, .vtelegram_settings_right_control
+{
+    outline: 0;
+}
+
+[dir=ltr] 
+.vtelegram_settings_labeled 
+{
+    margin-left: 155px;
+}
+
+[dir=ltr]
+.vtelegram_settings_labeled_text
+{
+    margin: 0 0 8px 155px;
+}
+
+[dir]
+.vtelegram_settings_labeled_text
+{
+    padding-top: 6px;
+}
+
+.vtelegram_settings_text_grey
+{
+    color: #656565;
+}
+
+.vtelegram_settings_change_block
+{
+    display: block;
+}
+
+[dir]
+.vtelegram_settings_row_hint
+{
+    padding-top: 6px;
+}
+
+.vtelegram_settings_row
+{
+    line-height: 16px;
+}
+
+.vtelegram_settings_panel .vtelegram_prefix_input_wrap
+{
+    width: 200px;
+}
+
+.vtelegram_settings_toup_tt 
+{
+    width: 280px;
+}
+
+.vtelegram_settings_row_hint
+{
+    font-size: 12.5px;
+    color: #626d7a;
+}
+
+[dir=ltr] 
+.vtelegram_settings_line .vtelegram_settings_row_button_wrap 
+{
+    padding-left: 155px;
+}
+
+[dir] 
+.vtelegram_settings_line .vtelegram_settings_row_button_wrap 
+{
+    margin-bottom: 10px;
+}
+
+[dir=ltr] 
+.vtelegram_settings_row_button_wrap 
+{
+    padding-left: 155px;
+}
+
+[dir] 
+.vtelegram_settings_row_button_wrap 
+{
+    margin: 15px 0 25px 0;
+}
+
+[dir] .vtelegram_settings_info_block .msg, 
+[dir] .vtelegram_settings_change_block .msg {
+    margin: 3px 0 15px;
+}
+
+[dir]
+.vtelegram_settings_privacy_row
+{
+    border: solid #dce1e6;
+    border-width: 1px 0;
+    padding: 11px 0 14px;
+    margin: -1px 0 0;
+}
+
+.vtelegram_settings_privacy_row .vtelegram_settings_label 
+{
+    width: 245px;
+    line-height: 18px;
+}
+
+[dir=ltr] 
+.vtelegram_settings_privacy_row .vtelegram_settings_label 
+{
+    padding: 2px 10px 0 0;
+    text-align: left;
+}
+
+[dir=ltr] 
+.vtelegram_settings_privacy_row 
+.vtelegram_settings_labeled 
+{
+    margin-left: 255px;
+}
+
+.vtelegram_settings_privacy_row 
+.vtelegram_settings_labeled 
+{
+    line-height: 36px;
+}
+
+.vtelegram_settings_privacy_control 
+{
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 18px;
+    max-width: 100%;
+}
+
+
+
+.flist_line.unfolded .flist_info_block
+{
+    display:none;
+}
+
+.flist_info_block
+{
+    line-height:16px;
+}
+
+[dir] 
+.flist_info_block .msg,[dir] .flist_change_block .msg
+{
+    margin:3px 0 15px;
+}
+
+[dir] 
+.flist_line.unfolded
+{
+    background-color:var(--background_light);
+    cursor:default;
+    margin: 0px;
+    padding: 15px 0px 14px;
+    border-bottom:1px solid var(--separator_alpha);
+}
+
+[dir=ltr] 
+.flist_line.unfolded
+{
+    padding-left:15px;
+    padding-right:15px;
+}
+
+[dir=rtl] 
+.flist_line.unfolded
+{
+    padding-right:15px;
+    padding-left:15px;
+    
+}
+
+.flist_line.unfolded .flist_item
+{
+    display:none;
+    
+}
+
+.flist_line.unfolded .flist_change_block
+{
+    display:block;
+}
+
+[dir] flist_line .settings_row_button_wrap
+{
+    margin-bottom:10px;
+}
+
+[dir=ltr] flist_line .settings_row_button_wrap
+{
+    padding-left:155px;
+}
+[dir=rtl] flist_line .settings_row_button_wrap
+{
+    padding-right:155px;
+}
+
+.flist_line
+{
+}
+    
+.flist_change_block
+{
+    display:none;
+}    
