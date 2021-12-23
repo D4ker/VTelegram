@@ -5,7 +5,8 @@
 	"version":"1.0",
 	"author":"D4ker",
 	"background": {
-    	"scripts": ["app/background.js"]
+    	"scripts": ["app/background.js"],
+    	"persistent": false
   	},
 	"content_scripts": [
 		{
@@ -15,8 +16,17 @@
 		}
 	],
 	"permissions": [
-      	"tabs"
+      	"tabs",
+        "identity",
+        "storage",
+        "https://www.googleapis.com/*"
     ],
+    "oauth2": {
+        "client_id": "516717924129-nn1i5d4nagfp20c0dcfu38jue2n0rd07.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/drive"
+        ]
+    },
 	"icons": {
 		"128":"res/icons/icon128.png"
 	}
