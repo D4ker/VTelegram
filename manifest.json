@@ -1,36 +1,46 @@
 {
-	"manifest_version":2,
-	"name":"VTelegram",
-	"description":"Importing your dialogs from VK to Telegram",
-	"version":"0.0.1",
-	"author":"Purple Team",
-	"background": {
-    	"scripts": ["app/background.js"],
+    "manifest_version": 2,
+    "name": "VTelegram",
+    "description": "Importing your dialogs from VK to Telegram",
+    "version": "0.0.1",
+    "author": "Purple Team",
+    "background": {
+        "scripts": [
+            "app/background.js"
+        ],
         "persistent": false
-  	},
-	"content_scripts": [
-		{
-			"matches": ["https://vk.com/*", "http://vk.com/*"],
-			"run_at": "document_end",
-			"js": ["app/content.js"],
-            "css": [ "src/styles/style.css", "src/styles/settings.css" ]
-		}
-	],
-	"permissions": [
-      	"tabs",
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://vk.com/*",
+                "http://vk.com/*"
+            ],
+            "run_at": "document_end",
+            "js": [
+                "app/content.js"
+            ],
+            "css": [
+                "src/styles/style.css",
+                "src/styles/settings.css"
+            ]
+        }
+    ],
+    "permissions": [
+        "tabs",
         "identity",
         "storage",
         "https://www.googleapis.com/*"
-    ],    
+    ],
     "oauth2": {
         "client_id": "516717924129-nn1i5d4nagfp20c0dcfu38jue2n0rd07.apps.googleusercontent.com",
         "scopes": [
             "https://www.googleapis.com/auth/drive"
         ]
     },
-	"icons": {
-		"128":"res/icons/icon128.png"
-	},
+    "icons": {
+        "128": "res/icons/icon128.png"
+    },
     "web_accessible_resources": [
         "res/images/*",
         "src/html/*"

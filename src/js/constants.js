@@ -30,8 +30,8 @@ export const docTypes = [
 export const TELEGRAM_CNV_PATH = 'https://t.me/';
 
 export const errors = {
-                NO_ERROR: "Ошибок не найдено",
-                PHONE_FORMAT_ERROR: "Номер телефона не соответствует формату",
-                EMPTY_VALUE: "Не введено значение",
-                SESSION_PASSWORD_NEEDED: "Ошибка авторизации, требуется пароль"
-            };
+    NO_ERROR: "Ошибок не найдено",
+    PHONE_FORMAT_ERROR: "Номер телефона не соответствует формату",
+    EMPTY_VALUE: "Не введено значение",
+    SESSION_PASSWORD_NEEDED: "Ошибка авторизации, требуется пароль"
+};
