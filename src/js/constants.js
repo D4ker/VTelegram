@@ -26,3 +26,12 @@ export const docTypes = [
     'page_post_thumb_unsized', // фото-документ
     'page_doc_photo_href', // гифка
 ];
+
+export const TELEGRAM_CNV_PATH = 'https://t.me/';
+
+export const errors = {
+                NO_ERROR: "Ошибок не найдено",
+                PHONE_FORMAT_ERROR: "Номер телефона не соответствует формату",
+                EMPTY_VALUE: "Не введено значение",
+                SESSION_PASSWORD_NEEDED: "Ошибка авторизации, требуется пароль"
+            };

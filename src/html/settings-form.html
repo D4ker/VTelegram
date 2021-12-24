@@ -1,0 +1,155 @@
+<div class="vtelegram_box hidden" id="settings_form">
+    <div class="box_body" style="display: block; padding: 0;">
+        <div id="settings_result" class="settings_result"></div>
+        <div class="settings_panel clear_fix settings_general">
+            <div class="settings_line" id="chgaddr">
+                <div class="settings_info_block">
+                    <div id="settings_address_label" class="settings_label">Адрес ссылки</div>
+                    <a id="settings_change_button" class="settings_right_control" tabindex="0" role="link">Изменить</a>
+                    <div id="settings_address_text" class="settings_labeled_text"> 
+                        <span id="settings_address_telegram" class="settings_text_grey"></span>Адрес не введен
+                        <span class="hint_icon" data-title="Введите ссылку на беседу в Телеграм, куда требуется импортировать сообщения. Если ссылка не будет введена, беседа будет создана автоматически." onmouseover="showHint(this);"></span>
+                    </div>
+                </div>
+                <div class="settings_change_block">
+                    <div id="settings_error_addr"></div>
+                    <div class="settings_row clear_fix">
+                        <div class="settings_label">Адрес страницы</div>
+                        <a id="settings_cancel_button" class="settings_right_control" tabindex="0" role="link">Отмена</a>
+                        <div class="settings_labeled">
+                            <div class="prefix_input_wrap" id="settings_addr_wrap">
+                                <div class="prefix_input_field">
+                                    <input id="settings_addr" type="text" class="prefix_input" maxlength="38" value="" autocomplete="off" placeholder="https://t.me/XXXXXXXXXXXXXXXX" style="padding-left: 9px;">
+                                    <div class="prefix_input_border"></div>
+                                </div>
+                            </div>
+                            <div class="settings_row_hint">Если ссылка <b>не будет введена</b>, беседа будет <b>создана автоматически.</b></div>
+                            <div class="settings_row_hint">Как&nbsp;взять адрес, читайте <a href="https://rg-gaming.ru/kompjutery/kak-v-telegramme-skopirovat-ssylku-na-chat" target="_blank">здесь</a>.</div>
+                        </div>
+                    </div>
+                    <div class="settings_row_button_wrap">
+                        <button id="settings_address_submit" class="flat_button">Изменить адрес</button>
+                    </div>
+                </div>
+            </div>
+            <div id="" class="settings_line">
+                <div class="settings_label">
+                    Настройки импорта <br><b>материалов</b>
+                    <span class="hint_icon" onmouseover="showTooltip(this, {text: 'Выберите какие материалы требуется импортировать и каким способом.<br><br><b>Прямой импорт</b> загружает все материалы непосредственно в Телеграм.<br><br><b>Импорт VK ссылками</b> загружает материалы ссылкой на сайт ВКонтакте. <br><br> <b>Google Drive импорт</b> позволяет загрузить все материалы на диск Google Drive. В беседе Телеграм все материалы будут заменены ссылками на файлы (требует авторизации в Google Drive).', dir: 'auto', shift: [22, 10], slide: 15, className: 'settings_tt'})"></span>
+                </div>
+                <div class="settings_labeled_text">
+                    <div class="settings_narrow_row">
+                        <input class="blind_label" type="checkbox" id="settings_check_video">
+                        <label for="settings_check_video" id="settings_check_video_label">Импорт видео: </label>
+                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                            <div class="idd_selected_value " id="videos_idd_selected_value" tabindex="0" role="link">
+                                Прямой импорт
+                            </div>
+                            <div class="idd_popup" id="videos_idd_settings_replies_order" style="margin-top: -21px; width: 200px; opacity: 1; margin-left: -10px; display: none;">
+                                <div class="idd_header_wrap ">
+                                    <div class="idd_header " id="videos_smart">Прямой импорт</div>
+                                </div>
+                                <div class="idd_items_wrap">
+                                    <div class="idd_items_content">
+                                        <div class="idd_item" id="videos_idd_item_drive_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Google Drive импорт</div>
+                                        </div>
+                                        <div class="idd_item" id="videos_idd_item_vk_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Импорт VK ссылками</div>
+                                        </div>
+                                        <div class="idd_item idd_hl default" id="videos_idd_item_direct" tabindex="0" role="button">
+                                            <div class="idd_item_name">Прямой импорт</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings_narrow_row">
+                        <input class="blind_label" type="checkbox" id="settings_check_image">
+                        <label for="settings_check_image" id="settings_check_image_label">Импорт изображений: </label>
+                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                            <div class="idd_selected_value " id="idd_selected_value" tabindex="0" role="link">
+                                Прямой импорт
+                            </div>
+                            <div class="idd_popup" id="idd_settings_replies_order" style="margin-top: -21px; width: 200px; opacity: 1; margin-left: -10px; display: none;">
+                                <div class="idd_header_wrap ">
+                                    <div class="idd_header " id="smart">Прямой импорт</div>
+                                </div>
+                                <div class="idd_items_wrap">
+                                    <div class="idd_items_content">
+                                        <div class="idd_item" id="idd_item_drive_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Google Drive импорт</div>
+                                        </div>
+                                        <div class="idd_item" id="idd_item_vk_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Импорт VK ссылками</div>
+                                        </div>
+                                        <div class="idd_item idd_hl default" id="idd_item_direct" tabindex="0" role="button">
+                                            <div class="idd_item_name">Прямой импорт</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings_narrow_row">
+                        <input class="blind_label" type="checkbox" id="settings_check_doc">
+                        <label for="settings_check_doc" id="settings_check_doc_label">Импорт документов: </label>
+                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                            <div class="idd_selected_value " id="idd_selected_value" tabindex="0" role="link">
+                                Прямой импорт
+                            </div>
+                            <div class="idd_popup" id="idd_settings_replies_order" style="margin-top: -21px; width: 200px; opacity: 1; margin-left: -10px; display: none;">
+                                <div class="idd_header_wrap ">
+                                    <div class="idd_header " id="smart">Прямой импорт</div>
+                                </div>
+                                <div class="idd_items_wrap">
+                                    <div class="idd_items_content">
+                                        <div class="idd_item" id="idd_item_drive_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Google Drive импорт</div>
+                                        </div>
+                                        <div class="idd_item" id="idd_item_vk_links" tabindex="0" role="button">
+                                            <div class="idd_item_name">Импорт VK ссылками</div>
+                                        </div>
+                                        <div class="idd_item idd_hl default" id="idd_item_direct" tabindex="0" role="button">
+                                            <div class="idd_item_name">Прямой импорт</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    <!--<span class="hint_icon" onmouseover="showTooltip(this, {text: 'Если включить эту настройку, элементы управления на&nbsp;сайте будут определены и&nbsp;озвучены синтезатором речи.<br><br>Настройка повышает доступность сайта и&nbsp;подходит для&nbsp;пользователей с&nbsp;ограниченными возможностями.', dir: 'auto', shift: [22, 10], slide: 15, className: 'settings_tt'})"></span>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tt_w tt_default settings_tt tt_up" style="position: absolute; opacity: 0; top: 199px; left: 218px; display: none; pointer-events: auto;">
+            <div class="wrapped">
+                <div class="tt_text">
+                    Если включить эту настройку, на вашей стене будут выводиться только ваши сообщения, а записи от друзей и других пользователей будут доступны по ссылке «ко всем записям».<br><br>Подходит для пользователей, которые активно делятся новостями на своей странице и хотят сконцентрировать общение вокруг собственных записей.
+                </div>
+            </div>
+        </div>
+        <div class="tt_w tt_default settings_tt tt_up" style="position: absolute; opacity: 0; top: 224px; left: 218px; display: none; pointer-events: auto;">
+            <div class="wrapped">
+                <div class="tt_text">
+                    Если включить эту настройку, другие пользователи смогут отвечать на&nbsp;ваши записи только на&nbsp;своих страницах, упоминая вас. При&nbsp;желании вы сможете следить за&nbsp;такими ответами через раздел <a href="/feed?section=notifications">Уведомления</a>.<br><br>Подходит для знаменитостей и&nbsp;публичных персон, которые поддерживают контакт с&nbsp;обширной аудиторией, но&nbsp;не&nbsp;имеют возможности постоянно модерировать комментарии.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="box_controls_wrap" style="display: block;">
+        <div class="box_controls">
+            <table cellspacing="0" cellpadding="0" class="fl_r">
+                <tbody>
+                    <tr>
+                        <td><button id="settings_back_button" class="flat_button secondary">Назад</button></td>
+                        <td><button id="settings_next_button" class="flat_button">Далее</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
