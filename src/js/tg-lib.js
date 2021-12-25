@@ -10,13 +10,13 @@ export async function authorize() {
     if (!user) {
 
         // заменить
-        var phone = prompt('Enter your phone: ');
+        const phone = prompt('Enter your phone: ');
         console.log('You entered ' + phone);
 
         const {phone_code_hash} = await TgCore.sendCode(phone);
 
         // заменить
-        var code = prompt('Enter the code: ');
+        const code = prompt('Enter the code: ');
         console.log('You entered ' + code);
 
         try {

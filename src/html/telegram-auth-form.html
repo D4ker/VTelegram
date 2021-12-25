@@ -1,0 +1,63 @@
+<div class="vtelegram_box hidden" id="telegram_auth_form">
+    <div class="box_body" style="display: block; padding: 30px 25px;" >
+        <div id="validation_box" class="">
+            <div class="vtelegram_validation_img"></div>
+            <div class="vtelegram_validation_text">
+                Для доступа к аккаунту Телеграм требуется ввести <b>номер телефона</b>.<br> Это позволит импортировать переписку.
+            </div>
+            <div class="validation_form">
+                <div id="validation_submit_result"></div>
+                <div id="validation_phone_row" class="vtelegram_validation_row" style="">
+                    <div id="validation_phone_wrap">
+                        <h4 class="subheader">Мобильный телефон</h4>
+                        <input type="text" class="dark vtelegram_validation_row" id="validation_phone" value="">
+                    </div>
+                    <a id="validation_other_phone" class="vtelegram_validation_other_phone" style="display: none">Указать другой номер</a>
+                </div>
+                <div id="validation_phone_submit" class="vtelegram_validation_submit_row" style="">
+                    <button id="validation_send_phone" class="flat_button button_wide button_big">Получить код</button>
+                </div>
+                
+                <div id="validation_code_row" class="vtelegram_validation_row" style="display: none">
+                    <div id="validation_code_wrap">
+                        <h4 class="subheader">Код подтверждения</h4>
+                        <input type="text" class="dark vtelegram_validation_row" id="validation_code" value="">
+                    </div>
+                </div>
+                <div id="validation_code_submit" class="vtelegram_validation_submit_row" style="display: none">
+                    <button id="validation_send_code" class="flat_button button_wide button_big">Отправить код</button>
+                </div>
+                <div id="validation_resend" class="vtelegram_validation_no_code" style="display: none"></div>
+                
+                <div id="validation_password_row" class="vtelegram_validation_row" style="display: none">
+                    <div id="validation_password_wrap">
+                        <h4 class="subheader">Пароль:</h4>
+                        <input type="text" class="dark vtelegram_validation_row" id="validation_password" value="">
+                    </div>
+                </div>
+                <div id="validation_password_submit" class="vtelegram_validation_submit_row" style="display: none">
+                    <button id="validation_send_password" class="flat_button button_wide button_big">Отправить пароль</button>
+                </div>
+            </div>            
+        </div>
+    </div>
+    
+    <div class="box_controls_wrap">
+        <div class="box_controls">
+            <table cellspacing="0" cellpadding="0" class="fl_r">
+                <tbody>
+                    <tr>
+                        <td><button id="auth_next_button" class="flat_button button_disabled">Далее</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--<div class="tt_w tt_default validation_tt validation_phone_tt tt_left" style="position: absolute; opacity: 1; top: 310px; left: 390px; pointer-events: auto; display: none;">
+    <div class="wrapped">
+        <div class="tt_text">
+            Ваш номер нигде <b>не выводится</b> и используется для входа на сайт и восстановления доступа к странице.<br><br>Пример для России:<br>+7 921 0000007
+        </div>
+    </div>
+</div>-->

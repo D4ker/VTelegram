@@ -32,3 +32,11 @@ export const driveScopes = {
     'uploadFile': 'https://www.googleapis.com/upload/drive/v3/files'
 };
 
+export const TELEGRAM_CNV_PATH = 'https://t.me/';
+
+export const errors = {
+    NO_ERROR: "Ошибок не найдено",
+    PHONE_FORMAT_ERROR: "Номер телефона не соответствует формату",
+    EMPTY_VALUE: "Не введено значение",
+    SESSION_PASSWORD_NEEDED: "Ошибка авторизации, требуется пароль"
+};
