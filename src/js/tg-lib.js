@@ -1,9 +1,13 @@
+// Код Влада
+// обёртка для удобного использования API
+
+import {logOut} from "./tg-core";
+
 const Lib = require('./lib');
 const TgCore = require('./tg-core');
-
 const CryptoJS = require('crypto-js');
 
-// процесс авторизации
+// Запускает процесс авторизации
 export async function authorize() {
     const user = await TgCore.getUser();
 
@@ -37,8 +41,9 @@ export async function authorize() {
             }
 
             // 2FA
-
-            const password = 'USER_PASSWORD';
+            // заменить
+            const password = prompt('Enter password for 2FA: ');
+            console.log('You entered ' + password);
 
             const {srp_id, current_algo, srp_B} = await TgCore.getPassword();
             const {g, p, salt1, salt2} = current_algo;
@@ -57,39 +62,99 @@ export async function authorize() {
     }
 }
 
-export async function runInterface(fileText) {
+export async function runInterface() {
     await authorize();
+}
 
-    const chat = await TgCore.api.call('messages.checkChatInvite', {
-        hash: 'sg1KIzmWisc5ZGVi'
-    });
+// Принимает инвайт линк (https://t.me/+v0F9TuhlPaxjMjMy) с помощью которого выбирается чат
+// Возвращает объект чата и его пользователей чата
+export async function getUsersByInvitationLink(invitationLink) {
+    let invitationHash = '';
 
-    const inputPeer = {
+    if (invitationLink.includes('.me/+'))
+        invitationHash = invitationLink.split('.me/+')[1];
+    else if (invitationLink.includes('joinchat/'))
+        invitationHash = invitationLink.split('joinchat/')[1];
+    else
+        invitationHash = invitationLink.split('.me/')[1];
+
+    const gChat = await TgCore.checkChatInvite([invitationHash]);
+
+    if(gChat.chat._ === "chat") {
+        const participants = await TgCore.getFullChat(gChat.chat.id);
+        console.log(participants);
+
+        return {gChat:gChat, users:participants.users, msg:'ok'};
+    } else if(gChat.chat._ === "channel") {
+        const inputChannel = {
+            _: 'inputChannel',
+            channel_id: gChat.chat.id,
+            access_hash: gChat.chat.access_hash
+        };
+        const channelParticipantsFilter = {
+            _: 'channelParticipantsSearch',
+            q: ''
+        };
+        const participants = await TgCore.getParticipants({
+            channel: inputChannel,
+            filter: channelParticipantsFilter,
+            offset: 0,
+            limit: 200,
+            hash: 0
+        });
+
+        return {gChat:gChat, users:participants.users, msg:'ok'};
+    }else{
+        return {gChat:'', users:'', msg:'err'};
+    }
+}
+
+// Запускает процесс импорта после всех настроек
+export async function startImport(gChat, data) {
+    console.log(await TgCore.checkHistoryImport(data.slice(0, 100)));
+
+    let inputPeer = null;
+    if(gChat.chat._ === "chat") {
+        inputPeer = {
+            _: 'inputPeerChat',
+            chat_id: gChat.chat.id,
+        };
+    }else if(gChat.chat._ === "channel"){
+        inputPeer = {
+            _: 'inputPeerChannel',
+            channel_id: gChat.chat.id,
+            access_hash: gChat.chat.access_hash
+        };
+    }else{
+        return false;
+    }
+    console.log(await TgCore.checkHistoryImportPeer(inputPeer));
+
+    const inputFile = await upload_file(data, 'import_file.txt');
+
+    inputPeer = {
         _: 'inputPeerChannel',
-        channel_id: chat.chat.id,
-        access_hash: chat.chat.access_hash
+        channel_id: gChat.chat.id,
+        access_hash: gChat.chat.access_hash
     };
-
-    console.log(chat);
-    console.log(inputPeer);
-
-    const check = await TgCore.api.call('messages.checkHistoryImport', {
-        import_head: fileText.slice(0, 100)
+    let initHistoryCallback = await TgCore.initHistoryImport({
+        peer: inputPeer,
+        file: inputFile,
+        media: 0, // изменить
     });
-    console.log(check);
+    console.log(initHistoryCallback)
 
-    // const file = createFile(gImportedText, 'console.txt', 'text/plain');
+    console.log(await TgCore.startHistoryImport({
+        peer: inputPeer,
+        import_id: initHistoryCallback.id
+    }));
 
-    const checkPeer = await TgCore.api.call('messages.checkHistoryImportPeer', {
-        peer: inputPeer
-    });
+}
 
-    console.log(checkPeer);
-
-    const byteTextArray = Lib.toUTF8Array(fileText);
-
+// загрузка inputFile на сервер с разбиением (для текста и изображений)
+async function upload_file(data, name) {
+    const byteTextArray = Lib.toUTF8Array(data);
     const byteTextArrayLength = byteTextArray.length;
-
     const fileId = Date.now();
     let filePart = 524288;
 
@@ -111,25 +176,11 @@ export async function runInterface(fileText) {
         _: 'inputFile',
         id: fileId,
         parts: part,
-        name: 'import_file.txt',
-        md5_checksum: CryptoJS.MD5(fileText)
+        name: name,
+        md5_checksum: CryptoJS.MD5(data)
     };
 
     console.log('pre-init');
 
-    const initHistoryImport = await TgCore.api.call('messages.initHistoryImport', {
-        peer: inputPeer,
-        file: inputFile,
-        media_count: 0
-    });
-
-    console.log('init');
-    console.log(initHistoryImport);
-
-    const historyImport = await TgCore.api.call('messages.startHistoryImport', {
-        peer: inputPeer,
-        import_id: initHistoryImport.id
-    });
-
-    console.log(historyImport);
+    return inputFile;
 }
