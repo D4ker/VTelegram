@@ -1,20 +1,62 @@
+const Constants = require('./constants');
+
 /*========= Google Drive updating part ==========*/
 /* только для background.js */
 
-//links - массив объектов, у которых поля: fileName - имя файла, linkUrl - url файла
+let parseText = function (response) {
+    return response.text();
+};
 
+let parseBlob = function (response) {
+    return response.blob();
+};
+
+let parseJson = function (response) {
+    return response.json();
+};
+
+let processStatus = function (response) {
+    if (response.status === 200 ||
+        response.status === 0) {
+        return Promise.resolve(response)
+    } else
+        return Promise.reject(new Error('Error loading: ' + response));
+};
+
+//пример работы с uploadFiles для загрузки 20 файлов
+//links - массив объектов, у которых поля: fileName - имя файла, linkUrl - url файла
+// Drive.createChatFolder('chatfolder_name')
+// .then(folderParams => {
+//     console.log(folderParams);
+//     let files = [];
+//     for (let i = 0; i < 20; i++) {
+//         files.push({
+//         linkUrl: 'https://sun9-13.userapi.com/impg/La1aeW1HDkkFHK-DPEl5nk5OELYCMUZTxwq23Q/HVo7fMAEZ3c.jpg?size=531x546&quality=96&sign=ac985e90ecf64a0b9cb170d63b545742&type=album',  
+//         fileName: 'test' });
+//     }
+//     
+//     Drive.uploadFiles(folderParams['id'], files);
+// });
 export function uploadFiles(folderId, links) {
     getToken()
     .then(async () => {
         let driveLinks = {}; 
         for (let linkInfo of links) {
-            let driveLink = /*remove await */await uploadMediaToDrive(linkInfo['linkUrl'], linkInfo['fileName'], folderId); 
+            let driveLink = await uploadMediaToDrive(linkInfo['linkUrl'], linkInfo['fileName'], folderId); 
             driveLinks[linkInfo['linkUrl']] = driveLink;
         }
         return driveLinks;
     });
 }
 
+//для одного файла
+// Drive.createChatFolder('one_more_chat_folder')
+// .then(folderParams => {
+//     console.log(folderParams);
+//     Drive.uploadFile(folderParams['id'], {
+//         linkUrl: 'https://sun9-13.userapi.com/impg/La1aeW1HDkkFHK-DPEl5nk5OELYCMUZTxwq23Q/HVo7fMAEZ3c.jpg?size=531x546&quality=96&sign=ac985e90ecf64a0b9cb170d63b545742&type=album',  
+//         fileName: 'test' });
+// });
 export function uploadFile(folderId, link) {
     getToken()
     .then(() => {
@@ -22,6 +64,7 @@ export function uploadFile(folderId, link) {
     });
 }
 
+//создает папку в папке чатов импорта
 export function createChatFolder(folderName) {
     return setMainExtFolder()
     .then(rootFolderId => {
@@ -40,26 +83,6 @@ function getToken() {
     });
 }
 
-let processStatus = function (response) {
-    if (response.status === 200 ||
-        response.status === 0) {
-        return Promise.resolve(response)
-    } else
-        return Promise.reject(new Error('Error loading: ' + url));
-};
-
-let parseText = function (response) {
-    return response.text();
-};
-
-let parseBlob = function (response) {
-    return response.blob();
-};
-
-let parseJson = function (response) {
-    return response.json();
-};
-
 //нужна, чтобы обрабатывать документы
 async function blobToHtml(blob) {
     let html = await new Promise((resolve) => {            
@@ -70,8 +93,7 @@ async function blobToHtml(blob) {
                  
     return html;
 }
-
-//скачивание файлов с вк для разных типов
+//скачивание файлов с вк
 function downloadFile(url)
 {
     return fetch(url)
@@ -83,7 +105,7 @@ function downloadFile(url)
 function fileExist(driveId) {
     return getToken()
     .then(async token => {
-        const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveId}?fields=trashed`, {
+        const response = await fetch(Constants.driveScopes['file'] + `/${driveId}?fields=trashed`, {
             method: 'GET',
             headers: new Headers({ 'authorization': 'Bearer ' + token, }),
         })
@@ -110,7 +132,7 @@ function createFolder(fileName, parent = 'root') {
                         'authorization': 'Bearer ' + token,
                         'Content-Type': 'application/json'
                         });
-        return fetch(`https://www.googleapis.com/drive/v3/files`, {
+        return fetch(Constants.driveScopes['file'], {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(file_metadata)
@@ -173,7 +195,7 @@ function uploadMediaToDrive(url, fileName = 'file', folderId) {
                 'authorization': 'Bearer ' + token,
             });
             
-            return fetch('https://www.googleapis.com/upload/drive/v3/files?fields=id,webViewLink&uploadType=multipart', {
+            return fetch(Constants.driveScopes['uploadFile'] + '?fields=id,webViewLink&uploadType=multipart', {
                 method: 'POST',
                 headers: headers,
                 body: form
@@ -186,7 +208,7 @@ function uploadMediaToDrive(url, fileName = 'file', folderId) {
                                 };
                 getToken()
                 .then(token => {
-                    fetch(`https://www.googleapis.com/drive/v3/files/${data['id']}/permissions`, {
+                    fetch(Constants.driveScopes['file'] + `/${data['id']}/permissions`, {
                         method: 'POST',
                         headers: new Headers({ 
                                                 Authorization: 'Bearer ' + token,

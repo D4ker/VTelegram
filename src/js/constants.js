@@ -26,3 +26,9 @@ export const docTypes = [
     'page_post_thumb_unsized', // фото-документ
     'page_doc_photo_href', // гифка
 ];
+
+export const driveScopes = {
+    'file': 'https://www.googleapis.com/drive/v3/files',
+    'uploadFile': 'https://www.googleapis.com/upload/drive/v3/files'
+};
+
