@@ -22,7 +22,7 @@ class MainForm {
                 formDom.getElementsByClassName('box_x_button')[0].addEventListener('click', event => this.close());
                 document.getElementById('box_layer').appendChild(formDom.body.firstElementChild);
                 
-                document.addEventListener("click", 
+                document.addEventListener('click', 
                     (event) => {
                         var isClickInside = main_form.contains(event.target);
                         if (!isClickInside)

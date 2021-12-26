@@ -9,6 +9,10 @@ class Settings {
     _formInsertionPromise = undefined;
     _isCursorInsideIdd = false;
 
+    videoImportType = Constants.EXPORT_MEDIA_URL_MODE;
+    imageImportType = Constants.EXPORT_MEDIA_URL_MODE;
+    docImportType = Constants.EXPORT_MEDIA_URL_MODE;
+    
     constructor() {
         this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/settings-form.html'))
             .then(response => {
@@ -60,7 +64,7 @@ class Settings {
                 formDom.getElementById('settings_check_doc_label').addEventListener('click',
                     (event) => this.changeCheckboxSelection(document.getElementById('settings_check_doc')));
 
-                document.addEventListener("click", 
+                document.addEventListener('click', 
                     (event) => {
                         const iddPopups = document.getElementsByClassName("idd_popup");
                         for (let popup of iddPopups) {
@@ -121,6 +125,10 @@ class Settings {
             });
     }
 
+    getConvAddress() {
+        return document.getElementById('settings_addr').value;
+    }
+    
     settingsAddressHandler = event => {
         //!!!!! обработка ссылки на беседу телеграм
         let convLink = document.getElementById('settings_addr').value;
@@ -171,20 +179,15 @@ class Settings {
                     for (let item of elem.getElementsByClassName('idd_popup'))
                         item.style.display = 'none';
 
-                    elem.getElementsByClassName('idd_selected_value')[0].innerText = iddItem.getElementsByClassName('idd_item_name')[0].innerText;
+                    let textValue = iddItem.getElementsByClassName('idd_item_name')[0].innerText;
+                    
+                    elem.getElementsByClassName('idd_selected_value')[0].innerText = textValue;
                     elem.getElementsByClassName('idd_popup')[0].style.display = 'none';
                     elem.getElementsByClassName('idd_hl')[0].classList.remove('idd_hl');
                     iddItem.classList.add('idd_hl');
+                    
+                    this.changeTypeImport(event.currentTarget);
                 });
-
-// потом понадобится
-//                             document.addEventListener('click',
-//                                 function(event)
-//                                 {
-//                                     console.log(isCursorInsideIdd);
-//                                     if (!isCursorInsideIdd)
-//                                         document.getElementById('idd_settings_replies_order').style.display = 'none';
-//                                 });
         }
     }
 
@@ -215,7 +218,49 @@ class Settings {
             elem.checked = 1;
         }
     }
+    
+    changeTypeImport(elem) {
+        let fileType = elem.id.substr(0, elem.id.indexOf('_'));
+        let importType = elem.id.substr(elem.id.indexOf('_') + 1, elem.id.length);
+        
+        switch (fileType) {
+            case 'video':
+                this.videoImportType = this.strToImportType(importType);
+                break;
+            
+            case 'image':
+                this.imageImportType = this.strToImportType(importType);
+                break;
+                
+            case 'doc':
+                this.docImportType = this.strToImportType(importType);
+                break;
+                
+            default:
+                throw new Error('VTelegram error: No handler occured for file type: ' + fileType);
+                
+        };
+    }
 
+    strToImportType(str) {
+        switch (str) {
+            case 'idd_item_drive_links':
+                return Constants.EXPORT_MEDIA_CLOUD_MODE;
+                break;
+                
+            case 'idd_item_direct':
+                return Constants.EXPORT_MEDIA_BOT_MODE;
+                break;
+                
+            case 'idd_item_vk_links':
+                return Constants.EXPORT_MEDIA_URL_MODE;
+                break;
+                
+            default:
+                throw new Error('VTelegram error: No handler occured for import type: ' + str);
+        };
+    }
+    
     errorHandler(err) {
         switch (err) {
             case Errors.EMPTY_VALUE:
