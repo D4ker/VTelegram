@@ -64,13 +64,13 @@ function createButton() {
         const selID = urlParams.get(Constants.VK_MSG_ID_PARAM);
         if (selID) {
             activeButton(exportButton, false);
-            MainForm.show();
-            // if (selID[0] === 'c') {
-            //     await ExportLib.exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
-            // } else {
-            //     await ExportLib.exportHistory(selID);
-            // }
-            // Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+            // MainForm.show();
+            if (selID[0] === 'c') {
+                await ExportLib.exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
+            } else {
+                await ExportLib.exportHistory(selID);
+            }
+            Lib.createFile(ExportLib.gImportedData.text, 'file.txt', 'plain/text');
             // await TgLib.runInterface(gImportedText);
             activeButton(exportButton, true);
         }

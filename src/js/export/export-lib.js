@@ -1,101 +1,24 @@
 const Constants = require('./../constants');
 const Lib = require('./../lib');
 
+const ExportMedia = require("./export-media");
+
 // Глобальные переменные
-let gSenders = {}; // список людей, состоящих в беседе
-let gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
-let gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
-let gImportedText = ''; // текст для импорта в Телеграм
+export let gImportedData = updateGlobalVars(); // данные для импорта в Телеграм
 
 function updateGlobalVars() {
-    gSenders = {}; // список людей, состоящих в беседе
-    gLeftSenders = {}; // список людей, состоящих в беседе, но затем покинувших её
-    gMediaExportMode = Constants.EXPORT_MEDIA_URL_MODE; // режим экспорта медиа
-    gImportedText = ''; // текст для импорта в Телеграм
-}
-
-function getDirectUrl(url) {
-    return url;
-}
-
-function getMediaUrls(msgId, msgMediaData, vkDoc) {
-    const mediaElementsDocBlock = vkDoc.getElementsByClassName(`_im_msg_media${msgId}`)[0];
-
-    if (mediaElementsDocBlock === undefined) {
-        return {};
+    return {
+        text: '',
+        senders: {}, // список людей, состоящих в беседе
+        left_senders: {}, // список людей, состоящих в беседе, но затем покинувших её
+        media_export_mode: Constants.EXPORT_MEDIA_URL_MODE // режим экспорта медиа
     }
-
-    const mediaElements = mediaElementsDocBlock.getElementsByTagName('a');
-    const audiomsgsElements = mediaElementsDocBlock.getElementsByClassName('audio-msg-track clear_fix');
-
-    const mediaObj = {
-        photos: [],
-        videos: [],
-        docs: [],
-        audiomsgs: [],
-        audios: [],
-        wall_posts: []
-    };
-
-    for (let media of mediaElements) {
-        if (media.getAttribute('data-photo-id')) { // фото
-            const photoObj = JSON.parse(`${media.getAttribute('onclick').match(`"temp":({.*?})`)[1]}`);
-            let max = -1;
-            let photoUrl = '';
-            for (let photo in photoObj) {
-                if (photo[1] === '_') {
-                    const photoWidth = parseInt(photoObj[photo][1], 10);
-                    const photoHeight = parseInt(photoObj[photo][2], 10);
-                    const photoSize = photoWidth * photoHeight;
-                    if (photoSize > max) {
-                        max = photoSize;
-                        photoUrl = photoObj[photo][0];
-                    }
-                }
-            }
-            mediaObj.photos.push(photoUrl);
-        } else if (media.getAttribute('data-video')) { // видео
-
-            // mediaObj.videos.push();
-        } else if (Constants.docTypes.indexOf(media.getAttribute('class')) !== -1) { // документы
-            const url = getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
-            mediaObj.docs.push(url);
-        } else if (media.getAttribute('class') === 'post_link') { // посты из групп
-            const url = Constants.MEDIA_PREFIX + media.getAttribute('href');
-            mediaObj.wall_posts.push(url);
-        } else if (media.getAttribute('audio')) { // аудио (музыка)
-            // mediaObj.audios.push();
-        }
-    }
-
-    for (let audiomsg of audiomsgsElements) { // аудиосообщения
-        mediaObj.audiomsgs.push(audiomsg.getAttribute('data-mp3'));
-    }
-
-    return mediaObj;
-}
-
-function exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
-    const mediaObj = getMediaUrls(msgId, msgMediaData, vkDoc);
-    for (let media in mediaObj) {
-        for (let url of mediaObj[media]) {
-            gImportedText += `${msgDateTime} - ${msgSender}: <${media}> ::: ${url}\n`;
-        }
-    }
-}
-
-function exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
-
-}
-
-function exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
-
 }
 
 // Функция для получения списка людей, состоящих в беседе
 function setSendersDataList(senders) {
     for (let sender in senders) {
-        gSenders[senders[sender].id] = {
+        gImportedData.senders[senders[sender].id] = {
             name: senders[sender].name,
             photo: senders[sender].photo
         };
@@ -103,72 +26,91 @@ function setSendersDataList(senders) {
 }
 
 // Функция для добавления в список людей, состоящих в беседе, удаленные из нее аккаунты
-function addSenderDataToList(dataHTML, senderId) {
-    const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
-    const msgElementsDocBlock = vkDoc.getElementsByClassName('im-mess-stack _im_mess_stack');
-    for (let msgElement of msgElementsDocBlock) {
-        if (msgElement.getAttribute('data-peer') === `${senderId}`) {
-            const senderDataElement = msgElement
-                .getElementsByClassName('nim-peer--photo')[0]
-                .getElementsByTagName('img')[0];
-            const senderData = {
-                name: senderDataElement.getAttribute('alt'),
-                photo: senderDataElement.getAttribute('src')
-            };
-            gLeftSenders[senderId] = senderData;
-            gSenders[senderId] = senderData;
-            return;
-        }
-    }
+function addSenderDataToList(msgElement, senderId) {
+    const senderDataElement = msgElement
+        .getElementsByClassName('nim-peer--photo')[0]
+        .getElementsByTagName('img')[0];
+    const senderData = {
+        name: senderDataElement.getAttribute('alt'),
+        photo: senderDataElement.getAttribute('src')
+    };
+    gImportedData.left_senders[senderId] = senderData;
+    gImportedData.senders[senderId] = senderData;
 }
 
-// Функция для обработки отступов, эмодзи и т.д. в сообщениях
-function getFormatMsg(msg) {
-    return msg;
+// Функция для обработки отступов, эмодзи и т.д. в сообщениях + получение DOM-элемента с медиа
+function getMsgData(msgId, msgDataElement) {
+    let mediaElement = null;
+    let msgText = '';
+    for (const el of msgDataElement.childNodes) {
+        if (el.nodeName === '#text') { // текст
+            msgText += el.textContent ? el.textContent : el.innerText;
+        } else if (el.nodeName === 'A') {
+            msgText += el.innerText;
+        } else if (el.className === 'emoji') { // эмодзи
+            msgText += el.getAttribute('alt');
+        } else if (el.nodeName === 'BR') { // перенос строки
+            msgText += '\n';
+        } else if (el.className === 'im-mess--lbl-was-edited _im_edit_time') {
+            const editTimestamp = el.getAttribute('data-time');
+            msgText += `\n------------\n`;
+            msgText += `(изменено ${Lib.formatTime(editTimestamp)})`;
+        } else if (el.className === `_im_msg_media${msgId}`) { // медиа
+            mediaElement = el;
+        } else { // другое
+            console.log('Unknown msg data:');
+            console.log([el]);
+            console.log(el.innerText);
+        }
+    }
+    return {
+        text: msgText,
+        media: mediaElement
+    };
 }
 
 // Функция для отправки запросов телеграм-боту
 function sendData(dataJSON, dataHTML) {
+    const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
     for (let key in dataJSON) {
-        const msgData = dataJSON[key];
+        const msgJsonData = dataJSON[key];
 
-        let senderId = 0;
-        if (msgData[5].hasOwnProperty('from')) {
-            senderId = msgData[5].from;
-        } else if (msgData[5].hasOwnProperty('oaid')) {
-            senderId = msgData[5].oaid;
-        } else {
-            senderId = msgData[2];
+        const msgId = msgJsonData[0]; // id сообщения
+        const msgElement = vkDoc.getElementsByClassName(`_im_mess_${msgId}`)[0];
+
+        const msgDataElement = msgElement.getElementsByClassName(`im-mess--text wall_module _im_log_body`)[0];
+        const msgData = getMsgData(msgId, msgDataElement);
+
+        const msgRootElement = msgElement.parentElement.parentElement.parentElement;
+        let senderId = Number(msgRootElement.getAttribute('data-peer'));
+
+        if (gImportedData.senders[senderId] === undefined) {
+            addSenderDataToList(msgRootElement, senderId);
         }
 
-        if (gSenders[senderId] === undefined) {
-            addSenderDataToList(dataHTML, senderId);
-        }
-
-        const msgId = msgData[0]; // id сообщения
-        const msgSender = gSenders[senderId].name; // имя отправителя
-        const msgDateTime = Lib.formatTime(msgData[3]); // время отправки сообщения
-        const msgText = getFormatMsg(msgData[4]); // текст сообщения
-        const msgMediaData = msgData[5]; // медиа-данные сообщения
+        const msgSender = gImportedData.senders[senderId].name; // имя отправителя
+        const msgDateTime = Lib.formatTime(msgJsonData[3]); // время отправки сообщения
+        const msgText = msgData.text; // текст сообщения
+        const msgMediaInfo = msgJsonData[5]; // информация о имеющихся медиа в сообщении
 
         if (msgText) {
-            gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
+            gImportedData.text += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
         }
 
-        if (msgMediaData.hasOwnProperty('attach_count')) {
-            const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
-            if (gMediaExportMode === Constants.EXPORT_MEDIA_URL_MODE) {
-                exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
-            } else if (gMediaExportMode === Constants.EXPORT_MEDIA_CLOUD_MODE) {
-                exportCloud(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
-            } else if (gMediaExportMode === Constants.EXPORT_MEDIA_BOT_MODE) {
-                exportBot(msgId, msgDateTime, msgSender, msgMediaData, vkDoc);
+        const msgMediaElement = msgData.media;
+        if (msgMediaInfo.hasOwnProperty('attach_count') && msgMediaElement !== null) {
+            if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_URL_MODE) {
+                ExportMedia.exportUrl(msgId, msgDateTime, msgSender, msgMediaElement);
+            } else if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_CLOUD_MODE) {
+                ExportMedia.exportCloud(msgId, msgDateTime, msgSender, msgMediaElement);
+            } else if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_BOT_MODE) {
+                ExportMedia.exportBot(msgId, msgDateTime, msgSender, msgMediaElement);
             }
         }
     }
 
-    // console.log(gImportedText);
-    // console.log(gLeftSenders);
+    // console.log(gImportedData.text);
+    // console.log(gImportedData.left_senders);
     // Код для отправки данных
 }
 
