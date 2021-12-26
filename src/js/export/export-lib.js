@@ -51,6 +51,11 @@ function getMsgData(msgId, msgDataElement) {
             msgText += el.getAttribute('alt');
         } else if (el.nodeName === 'BR') { // перенос строки
             msgText += '\n';
+        } else if (el.className === 'im-replied _im_replied_message' || el.className === `_im_msg_reply${msgId}`) { // ОТВЕТ на сообщение
+            msgText += getMsgData(msgId, el.getElementsByClassName('im-replied--text')[0]).text;
+            msgText += '\n';
+            msgText += el.getElementsByClassName('im-replied--author')[0].textContent.trim();
+            msgText += '\n------------\n';
         } else if (el.className === 'im-mess--lbl-was-edited _im_edit_time') {
             const editTimestamp = el.getAttribute('data-time');
             msgText += `\n------------\n`;
@@ -76,9 +81,19 @@ function sendData(dataJSON, dataHTML) {
         const msgJsonData = dataJSON[key];
 
         const msgId = msgJsonData[0]; // id сообщения
+
         const msgElement = vkDoc.getElementsByClassName(`_im_mess_${msgId}`)[0];
+        // По всей видимости в старых переписках удаленные сообщения можно найти в dataJSON. Но в dataHTML их нет
+        if (msgElement === undefined) {
+            continue;
+        }
 
         const msgDataElement = msgElement.getElementsByClassName(`im-mess--text wall_module _im_log_body`)[0];
+        // Если сообщение не имеет блока с данными (например, системное сообщение о создании беседы)
+        if (msgDataElement === undefined) {
+            continue;
+        }
+
         const msgData = getMsgData(msgId, msgDataElement);
 
         const msgRootElement = msgElement.parentElement.parentElement.parentElement;
@@ -139,7 +154,7 @@ async function sendHistoryPart(peer, offset) {
 
 // Функция для получения всей истории переписки
 export async function exportHistory(peer) {
-    updateGlobalVars(); // обнуляем глобальные переменные
+    gImportedData = updateGlobalVars(); // обнуляем глобальные переменные
 
     // Получение первого сообщения с основной информацией
     const startData = Lib.toUrlData({
