@@ -20,7 +20,11 @@ class StartImport {
 
                 formDom.getElementById('start_import_back_button').addEventListener('click',
                     (event) => Emitter.emit('event:start-import-back', {}));
-
+                
+                formDom.getElementById('start_import_exit_telegram_button').addEventListener('click', 
+                    (event) => {
+                        Emitter.emit('event:telegram-exit', {});
+                    });
                 document.getElementsByClassName('popup_box_container')[0].appendChild(formDom.body.firstElementChild);
             })
     }

@@ -4,7 +4,7 @@
         <div class="settings_panel clear_fix settings_general">
             <div class="settings_line" id="chgaddr">
                 <div class="settings_info_block">
-                    <div id="settings_address_label" class="settings_label">Адрес ссылки</div>
+                    <div id="settings_address_label" class="settings_label">Адрес беседы</div>
                     <a id="settings_change_button" class="settings_right_control" tabindex="0" role="link">Изменить</a>
                     <div id="settings_address_text" class="settings_labeled_text"> 
                         <span id="settings_address_telegram" class="settings_text_grey"></span>Адрес не введен
@@ -14,7 +14,7 @@
                 <div class="settings_change_block">
                     <div id="settings_error_addr"></div>
                     <div class="settings_row clear_fix">
-                        <div class="settings_label">Адрес страницы</div>
+                        <div class="settings_label">Адрес беседы</div>
                         <a id="settings_cancel_button" class="settings_right_control" tabindex="0" role="link">Отмена</a>
                         <div class="settings_labeled">
                             <div class="prefix_input_wrap" id="settings_addr_wrap">
@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="settings_row_button_wrap">
-                        <button id="settings_address_submit" class="flat_button">Изменить адрес</button>
+                        <button id="settings_address_submit" class="flat_button button_disabled">Изменить адрес</button>
                     </div>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                     <div class="settings_narrow_row">
                         <input class="blind_label" type="checkbox" id="settings_check_video">
                         <label for="settings_check_video" id="settings_check_video_label">Импорт видео: </label>
-                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                        <div class="idd_wrap settings_replies_order disabled" id="settings_replies_order">
                             <div class="idd_selected_value " id="videos_idd_selected_value" tabindex="0" role="link">
                                 Прямой импорт
                             </div>
@@ -68,7 +68,7 @@
                     <div class="settings_narrow_row">
                         <input class="blind_label" type="checkbox" id="settings_check_image">
                         <label for="settings_check_image" id="settings_check_image_label">Импорт изображений: </label>
-                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                        <div class="idd_wrap settings_replies_order disabled" id="settings_replies_order">
                             <div class="idd_selected_value " id="idd_selected_value" tabindex="0" role="link">
                                 Прямой импорт
                             </div>
@@ -95,7 +95,7 @@
                     <div class="settings_narrow_row">
                         <input class="blind_label" type="checkbox" id="settings_check_doc">
                         <label for="settings_check_doc" id="settings_check_doc_label">Импорт документов: </label>
-                        <div class="idd_wrap settings_replies_order" id="settings_replies_order">
+                        <div class="idd_wrap settings_replies_order disabled" id="settings_replies_order">
                             <div class="idd_selected_value " id="idd_selected_value" tabindex="0" role="link">
                                 Прямой импорт
                             </div>
@@ -145,11 +145,11 @@
             <table cellspacing="0" cellpadding="0" class="fl_r">
                 <tbody>
                     <tr>
-                        <td><button id="settings_back_button" class="flat_button secondary">Назад</button></td>
                         <td><button id="settings_next_button" class="flat_button">Далее</button></td>
                     </tr>
                 </tbody>
             </table>
+            <button id="settings_exit_telegram_button" class="round_button">Выйти из Телеграм</button>
         </div>
     </div>
 </div>

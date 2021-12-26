@@ -26,6 +26,14 @@ class Settings {
                         document.getElementById('chgaddr').classList.add('unfolded');
                     });
 
+                formDom.getElementById('settings_addr').addEventListener('input',
+                    (event) => {
+                        if (event.target.value.length === 0)
+                            document.getElementById('settings_address_submit').classList.add('button_disabled');
+                        else
+                            document.getElementById('settings_address_submit').classList.remove('button_disabled');
+                    });
+                
                 formDom.getElementById('settings_cancel_button').addEventListener('click',
                     (event) => {
                         if (currentCode.length === 0) {
@@ -41,7 +49,7 @@ class Settings {
                     });
 
                 formDom.getElementById('settings_address_submit').addEventListener('click', this.settingsAddressHandler);
-
+                
                 //чекбоксы с материалами
                 formDom.getElementById('settings_check_video_label').addEventListener('click',
                     (event) => this.changeCheckboxSelection(document.getElementById('settings_check_video')));
@@ -52,16 +60,26 @@ class Settings {
                 formDom.getElementById('settings_check_doc_label').addEventListener('click',
                     (event) => this.changeCheckboxSelection(document.getElementById('settings_check_doc')));
 
+                document.addEventListener("click", 
+                    (event) => {
+                        const iddPopups = document.getElementsByClassName("idd_popup");
+                        for (let popup of iddPopups) {
+                            var isClickInside = popup.contains(event.target);
+                            if (!isClickInside)
+                                popup.style.display = 'none';
+                        }
+                    }, true);
+                
                 formDom.getElementById('settings_next_button').addEventListener('click',
                     (event) => {
                         Emitter.emit('event:settings-completed', {});
                     });
-
-                formDom.getElementById('settings_back_button').addEventListener('click',
+                
+                formDom.getElementById('settings_exit_telegram_button').addEventListener('click', 
                     (event) => {
-                        Emitter.emit('event:settings-back', {});
+                        Emitter.emit('event:telegram-exit', {});
                     });
-
+                
                 document.getElementsByClassName('popup_box_container')[0].appendChild(formDom.body.firstElementChild);
 
                 for (let item of document.querySelectorAll('.vtelegram_box .settings_narrow_row'))
@@ -98,6 +116,7 @@ class Settings {
                     elem.getElementsByClassName('idd_hl')[0].classList.remove('idd_hl');
                     elem.getElementsByClassName('default')[0].classList.add('idd_hl');
                     elem.getElementsByClassName('idd_header')[0].innerText = 'Прямой импорт';
+                    elem.getElementsByClassName('idd_wrap')[0].classList.add('disabled');
                 }
             });
     }
@@ -186,7 +205,15 @@ class Settings {
     }
 
     changeCheckboxSelection(elem) {
-        elem.checked = elem.checked ? 0 : 1;
+        if (elem.checked) {
+            let comboBox = document.querySelector('#' + elem.id + '~.idd_wrap');
+            comboBox.getElementsByClassName('idd_popup')[0].style.display = 'none';
+            comboBox.classList.add('disabled');
+            elem.checked = 0;
+        } else {
+            document.querySelector('#' + elem.id + '~.idd_wrap').classList.remove('disabled');
+            elem.checked = 1;
+        }
     }
 
     errorHandler(err) {
