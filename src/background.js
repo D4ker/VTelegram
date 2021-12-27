@@ -1,4 +1,5 @@
 const Constants = require("./js/constants");
+const Drive = require("./js/drive");
 
 chrome.tabs.onUpdated.addListener(
     function (tabId, changeInfo, tab) {

@@ -27,6 +27,11 @@ export const docTypes = [
     'page_doc_photo_href', // гифка
 ];
 
+export const driveScopes = {
+    'file': 'https://www.googleapis.com/drive/v3/files',
+    'uploadFile': 'https://www.googleapis.com/upload/drive/v3/files'
+};
+
 export const TELEGRAM_CNV_PATH = 'https://t.me/';
 
 export const errors = {
