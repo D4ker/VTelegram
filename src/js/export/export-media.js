@@ -72,7 +72,7 @@ async function getMediaUrls(msgId, msgMediaElement) {
             if (url) {
                 mediaObj.videos.push(url);
             }
-        } else if (Constants.docTypes.indexOf(media.getAttribute('class')) !== -1) { // документы
+        } else if (Constants.docTypes.filter(value => media.classList.contains(value)).length !== 0) { // документы
             const url = getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
             mediaObj.docs.push(url);
         } else if (media.getAttribute('class') === 'post_link') { // посты из групп
