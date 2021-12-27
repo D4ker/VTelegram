@@ -1,6 +1,7 @@
 export const requestURL = {
-    'start_history': 'https://vk.com/al_im.php?act=a_start',
-    'history': 'https://vk.com/al_im.php?act=a_history'
+    start_history: 'https://vk.com/al_im.php?act=a_start',
+    history: 'https://vk.com/al_im.php?act=a_history',
+    video: 'https://vk.com/al_video.php?act=show'
 };
 
 // Сколько сообщений приходит в самом начале

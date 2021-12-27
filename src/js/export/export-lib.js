@@ -75,7 +75,7 @@ function getMsgData(msgId, msgDataElement) {
 }
 
 // Функция для отправки запросов телеграм-боту
-function sendData(dataJSON, dataHTML) {
+async function sendData(dataJSON, dataHTML) {
     const vkDoc = new DOMParser().parseFromString(dataHTML, "text/html");
     for (let key in dataJSON) {
         const msgJsonData = dataJSON[key];
@@ -115,11 +115,11 @@ function sendData(dataJSON, dataHTML) {
         const msgMediaElement = msgData.media;
         if (msgMediaInfo.hasOwnProperty('attach_count') && msgMediaElement !== null) {
             if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_URL_MODE) {
-                ExportMedia.exportUrl(msgId, msgDateTime, msgSender, msgMediaElement);
+                await ExportMedia.exportUrl(msgId, msgDateTime, msgSender, msgMediaElement);
             } else if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_CLOUD_MODE) {
-                ExportMedia.exportCloud(msgId, msgDateTime, msgSender, msgMediaElement);
+                await ExportMedia.exportCloud(msgId, msgDateTime, msgSender, msgMediaElement);
             } else if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_BOT_MODE) {
-                ExportMedia.exportBot(msgId, msgDateTime, msgSender, msgMediaElement);
+                await ExportMedia.exportBot(msgId, msgDateTime, msgSender, msgMediaElement);
             }
         }
     }
@@ -147,7 +147,7 @@ async function sendHistoryPart(peer, offset) {
         const currentData = jsonOffsetData['payload'][1][1];
         // Мы не можем наверняка знать, сколько сообщений было удалено пользователями
         if (Object.keys(currentData).length) {
-            sendData(currentData, jsonOffsetData['payload'][1][0]);
+            await sendData(currentData, jsonOffsetData['payload'][1][0]);
         }
     }
 }

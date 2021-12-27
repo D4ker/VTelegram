@@ -1,3 +1,5 @@
+const Lib = require("./../lib");
+
 const Constants = require("./../constants");
 
 const ExportLib = require("./export-lib");
@@ -7,7 +9,35 @@ function getDirectUrl(url) {
     return url;
 }
 
-function getMediaUrls(msgId, msgMediaElement) {
+async function getVideoUrl(videoElement) {
+    const videoData = Lib.toUrlData({
+        act: 'show',
+        al: 1,
+        autoplay: 1,
+        list: videoElement.getAttribute('data-list'),
+        module: 'im',
+        video: videoElement.getAttribute('data-video')
+    });
+    const result = await Lib.request(Constants.requestURL['video'], 'POST', videoData);
+    if (result.ok) {
+        const jsonVideoData = await result.json();
+
+        // Получаем прямые ссылки только на видео из вк
+        if (jsonVideoData['payload'][1][4]['player']['type'] !== 'vk') {
+            return false;
+        }
+
+        const video = jsonVideoData['payload'][1][4]['player']['params'][0];
+        // const duration = video.duration;
+        // const preview = video.jpg;
+        const urls = Object.keys(video).filter((key) => /url\d+/.test(key)).sort();
+        const url = video[urls[urls.length - 1]];
+
+        return url;
+    }
+}
+
+async function getMediaUrls(msgId, msgMediaElement) {
     const mediaElements = msgMediaElement.getElementsByTagName('a');
     const audiomsgsElements = msgMediaElement.getElementsByClassName('audio-msg-track clear_fix');
 
@@ -37,9 +67,11 @@ function getMediaUrls(msgId, msgMediaElement) {
                 }
             }
             mediaObj.photos.push(photoUrl);
-        } else if (media.getAttribute('data-video')) { // видео
-
-            // mediaObj.videos.push();
+        } else if (media.getAttribute('data-video') && media.classList.contains('page_post_thumb_video')) { // видео
+            const url = await getVideoUrl(media);
+            if (url) {
+                mediaObj.videos.push(url);
+            }
         } else if (Constants.docTypes.indexOf(media.getAttribute('class')) !== -1) { // документы
             const url = getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
             mediaObj.docs.push(url);
@@ -58,8 +90,8 @@ function getMediaUrls(msgId, msgMediaElement) {
     return mediaObj;
 }
 
-export function exportUrl(msgId, msgDateTime, msgSender, msgMediaElement) {
-    const mediaObj = getMediaUrls(msgId, msgMediaElement);
+export async function exportUrl(msgId, msgDateTime, msgSender, msgMediaElement) {
+    const mediaObj = await getMediaUrls(msgId, msgMediaElement);
     for (let media in mediaObj) {
         for (let url of mediaObj[media]) {
             ExportLib.gImportedData.text += `${msgDateTime} - ${msgSender}: <${media}> ::: ${url}\n`;
