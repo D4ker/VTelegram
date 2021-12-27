@@ -39,8 +39,6 @@ class TelegramAuth {
                 formDom.getElementById('validation_other_phone').addEventListener('click',
                     (event) => this.clean());
 
-                formDom.getElementById('auth_next_button').addEventListener('click', (event) => Emitter.emit('event:auth-completed', {}));
-
                 document.getElementsByClassName('popup_box_container')[0].appendChild(formDom.body.firstElementChild);
             });
     }
@@ -70,8 +68,6 @@ class TelegramAuth {
 
         this.unsetPasswordBlockReadOnly();
         this.hidePasswordBlock();
-
-        document.getElementById('auth_next_button').classList.add('button_disabled');
     }
 
     sendPhoneHandler = event => {
@@ -99,7 +95,6 @@ class TelegramAuth {
             this.clearPhoneValidationErrorHTML();
             this.setCodeBlockReadOnly();
             this.hideCodeButton();
-            document.getElementById('auth_next_button').classList.remove('button_disabled');
             Emitter.emit('event:auth-completed', {});
         } else
             this.errorHandler(error);
@@ -114,7 +109,6 @@ class TelegramAuth {
             this.clearPhoneValidationErrorHTML();
             this.setPasswordBlockReadOnly();
             this.hidePasswordBlock();
-            document.getElementById('auth_next_button').classList.remove('button_disabled');
             Emitter.emit('event:auth-completed', {});
         } else
             this.errorHandler(error);

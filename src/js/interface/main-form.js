@@ -21,6 +21,13 @@ class MainForm {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');
                 formDom.getElementsByClassName('box_x_button')[0].addEventListener('click', event => this.close());
                 document.getElementById('box_layer').appendChild(formDom.body.firstElementChild);
+                
+                document.addEventListener('click', 
+                    (event) => {
+                        var isClickInside = main_form.contains(event.target);
+                        if (!isClickInside)
+                            this.close();
+                    }, true);
             })
             .then(() => {
                 this._telegramAuth = require('./telegram-auth').default;
@@ -34,10 +41,6 @@ class MainForm {
                 Emitter.subscribe('event:settings-completed', data => {
                     this.hideBody();
                     this._peopleImport.show();
-                });
-                Emitter.subscribe('event:settings-back', data => {
-                    this.hideBody();
-                    this._telegramAuth.show();
                 });
 
                 this._peopleImport = require('./people-import').default;
@@ -58,6 +61,15 @@ class MainForm {
                 Emitter.subscribe('event:start-import-back', data => {
                     this.hideBody();
                     this._peopleImport.show();
+                });
+                
+                Emitter.subscribe('event:telegram-exit', data => {
+                    this.hideBody();
+                    this._telegramAuth.clean();
+                    this._settings.clean();
+                    this._peopleImport.clean();
+                    this._startImport.clean();
+                    this._telegramAuth.show();
                 });
             });
     }
@@ -80,7 +92,6 @@ class MainForm {
         this._formInsertionPromise
             .then(() => {
                 let exportButton = document.getElementById('ui_rmenu_export_vt');
-                //activeButton(exportButton, true); //передвинуть отсюда в контент.жз
                 this._telegramAuth.clean();
                 this._settings.clean();
                 this._peopleImport.clean();

@@ -23,7 +23,11 @@ class PeopleImport {
 
                 formDom.getElementById('people_import_back_button').addEventListener('click',
                     (event) => Emitter.emit('event:people-import-back', {}));
-
+                
+                formDom.getElementById('people_import_exit_telegram_button').addEventListener('click', 
+                    (event) => {
+                        Emitter.emit('event:telegram-exit', {});
+                    });
                 return formDom;
             })
             .then(formDom => {
