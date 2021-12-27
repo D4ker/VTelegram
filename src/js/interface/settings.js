@@ -9,9 +9,10 @@ class Settings {
     _formInsertionPromise = undefined;
     _isCursorInsideIdd = false;
 
-    videoImportType = Constants.EXPORT_MEDIA_URL_MODE;
-    imageImportType = Constants.EXPORT_MEDIA_URL_MODE;
-    docImportType = Constants.EXPORT_MEDIA_URL_MODE;
+    videoImportType = Constants.EXPORT_MEDIA_NONE;
+    imageImportType = Constants.EXPORT_MEDIA_NONE;
+    docImportType = Constants.EXPORT_MEDIA_NONE;
+   
     
     constructor() {
         this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/settings-form.html'))
@@ -208,15 +209,45 @@ class Settings {
     }
 
     changeCheckboxSelection(elem) {
+        
         if (elem.checked) {
             let comboBox = document.querySelector('#' + elem.id + '~.idd_wrap');
             comboBox.getElementsByClassName('idd_popup')[0].style.display = 'none';
             comboBox.classList.add('disabled');
+            
+            let type = elem.id.slice(elem.id.lastIndexOf('_') + 1);
+            this.setImportToNone(type);
+            
             elem.checked = 0;
         } else {
-            document.querySelector('#' + elem.id + '~.idd_wrap').classList.remove('disabled');
+            let comboBox = document.querySelector('#' + elem.id + '~.idd_wrap');
+            comboBox.classList.remove('disabled');
+            
+            let selectedElem = comboBox.getElementsByClassName('idd_hl')[0];
+            this.changeTypeImport(selectedElem);
+            
             elem.checked = 1;
         }
+    }
+    
+    setImportToNone(type) {
+        switch (type) {
+            case 'video':
+                this.videoImportType = Constants.EXPORT_MEDIA_NONE;
+                break;
+            
+            case 'image':
+                this.imageImportType = Constants.EXPORT_MEDIA_NONE;
+                break;
+                
+            case 'doc':
+                this.docImportType = Constants.EXPORT_MEDIA_NONE;
+                break;
+                
+            default:
+                throw new Error('VTelegram error: setImportToNone: No handler occured for type: ' + type);
+                
+        };
     }
     
     changeTypeImport(elem) {
@@ -237,7 +268,7 @@ class Settings {
                 break;
                 
             default:
-                throw new Error('VTelegram error: No handler occured for file type: ' + fileType);
+                throw new Error('VTelegram error: changeTypeImport: No handler occured for file type: ' + fileType);
                 
         };
     }
@@ -257,7 +288,7 @@ class Settings {
                 break;
                 
             default:
-                throw new Error('VTelegram error: No handler occured for import type: ' + str);
+                throw new Error('VTelegram error: strToImportType: No handler occured for import type: ' + str);
         };
     }
     

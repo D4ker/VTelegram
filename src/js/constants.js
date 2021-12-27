@@ -15,6 +15,7 @@ export const VK_MSG_ID_PARAM = 'sel';
 export const CONVERSATION_START_ID = 2000000000;
 
 // Режимы экспорта медиа
+export const EXPORT_MEDIA_NONE = -1;
 export const EXPORT_MEDIA_URL_MODE = 0;
 export const EXPORT_MEDIA_CLOUD_MODE = 1;
 export const EXPORT_MEDIA_BOT_MODE = 2;
