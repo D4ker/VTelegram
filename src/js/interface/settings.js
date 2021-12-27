@@ -123,6 +123,10 @@ class Settings {
                     elem.getElementsByClassName('idd_header')[0].innerText = 'Прямой импорт';
                     elem.getElementsByClassName('idd_wrap')[0].classList.add('disabled');
                 }
+                
+                this.videoImportType = Constants.EXPORT_MEDIA_NONE;
+                this.imageImportType = Constants.EXPORT_MEDIA_NONE;
+                this.docImportType = Constants.EXPORT_MEDIA_NONE;
             });
     }
 
