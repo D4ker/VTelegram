@@ -46,7 +46,8 @@ function getMsgData(msgId, msgDataElement) {
         if (el.nodeName === '#text') { // текст
             msgText += el.textContent ? el.textContent : el.innerText;
         } else if (el.nodeName === 'A') {
-            msgText += el.innerText;
+            const hrefTitle = el.getAttribute('title');
+            msgText += hrefTitle ? hrefTitle : el.innerText;
         } else if (el.className === 'emoji') { // эмодзи
             msgText += el.getAttribute('alt');
         } else if (el.nodeName === 'BR') { // перенос строки
