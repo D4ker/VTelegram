@@ -1,3 +1,5 @@
+const Config = require('../../config.json');
+
 // методы для взаимодействия c Tg API
 const MTProto = require('@mtproto/core/envs/browser');
 const {sleep} = require('@mtproto/core/src/utils/common');
@@ -5,11 +7,7 @@ const {sleep} = require('@mtproto/core/src/utils/common');
 // API обработчик ошибок
 class API {
     constructor() {
-        this.mtproto = new MTProto({
-            // публичные API ID и HASH!
-            api_id: '6',
-            api_hash: 'eb06d4abfb49dc3eeb1aeb98ae0f581e'
-        });
+        this.mtproto = new MTProto(Config.telegram_api);
     }
 
     async call(method, params, options = {}) {
