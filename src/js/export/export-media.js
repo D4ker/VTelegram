@@ -77,7 +77,7 @@ async function getMediaUrls(msgId, msgMediaElement) {
         if (media.getAttribute('data-photo-id')) { // фото
             const photoObj = JSON.parse(`${media.getAttribute('onclick').match(`"temp":({.*?})`)[1]}`);
             let max = -1;
-            let photoUrl = '';
+            let photoKey = '';
             for (let photo in photoObj) {
                 if (photo[1] === '_') {
                     const photoWidth = parseInt(photoObj[photo][1], 10);
@@ -85,11 +85,11 @@ async function getMediaUrls(msgId, msgMediaElement) {
                     const photoSize = photoWidth * photoHeight;
                     if (photoSize > max) {
                         max = photoSize;
-                        photoUrl = photoObj[photo][0];
+                        photoKey = photo[0];
                     }
                 }
             }
-            mediaObj.photos.push(photoUrl);
+            mediaObj.photos.push(photoObj[photoKey]);
         } else if (media.getAttribute('data-video') && media.classList.contains('page_post_thumb_video')) { // видео
             const url = await getVideoUrl(media);
             if (url) {
