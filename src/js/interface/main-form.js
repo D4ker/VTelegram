@@ -22,8 +22,8 @@ class MainForm {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');
                 formDom.getElementsByClassName('box_x_button')[0].addEventListener('click', event => this.close());
                 document.getElementById('box_layer').appendChild(formDom.body.firstElementChild);
-                
-                document.addEventListener('click', 
+
+                document.addEventListener('click',
                     (event) => {
                         var isClickInside = main_form.contains(event.target);
                         if (!isClickInside)
@@ -63,7 +63,7 @@ class MainForm {
                     this.hideBody();
                     this._peopleImport.show();
                 });
-                
+
                 Emitter.subscribe('event:telegram-exit', data => {
                     this.hideBody();
                     this._telegramAuth.clean();
@@ -77,7 +77,7 @@ class MainForm {
 
     show() {
         this._formInsertionPromise
-            .then(() => {
+            .then(async () => {
                 document.body.classList.add('layers_shown');
                 document.getElementById('box_layer_wrap').style.display = 'block';
                 document.getElementById('box_layer_bg').style.display = 'block';
@@ -85,9 +85,9 @@ class MainForm {
                 document.getElementById('main_form').classList.remove('hidden');
 
                 this.hideBody();
-                const result = TgLib.isAuthorized()
-                console.log(result)
-                if(!result)
+                const result = await TgLib.isAuthorized();
+                console.log(result);
+                if (!result)
                     this._telegramAuth.show();
                 else
                     this._settings.show();
