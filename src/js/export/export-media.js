@@ -5,8 +5,31 @@ const Constants = require("./../constants");
 const ExportLib = require("./export-lib");
 
 // Получение прямой ссылки на документ
-function getDirectUrl(url) {
-    return url;
+async function getDirectUrl(url) {
+    let directUrl = Constants.MEDIA_PREFIX + url;
+    // Контроллер для прерывания скачивания медиа, не содержащихся в html коде
+    let controller = new AbortController();
+    const result = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal
+    });
+    if (result.ok && result.headers.get('Content-Type').includes('text/html')) {
+        const htmlDocData = await result.text();
+        const docData = new DOMParser().parseFromString(htmlDocData, 'text/html');
+        const center = docData.getElementsByTagName('center')[0];
+        const iframe = docData.getElementById('iframe');
+        if (center) {
+            directUrl = center.getElementsByTagName('img')[0].getAttribute('src');
+        } else if (iframe) {
+            directUrl = iframe.getAttribute('src');
+        }
+    } else {
+        // Получаем ПРЯМУЮ ссылку на документ после редиректа
+        directUrl = result.url;
+        // Прерываем закачку файла, если в заголовке был не text/html
+        controller.abort();
+    }
+    return directUrl;
 }
 
 async function getVideoUrl(videoElement) {
@@ -73,7 +96,7 @@ async function getMediaUrls(msgId, msgMediaElement) {
                 mediaObj.videos.push(url);
             }
         } else if (Constants.docTypes.filter(value => media.classList.contains(value)).length !== 0) { // документы
-            const url = getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
+            const url = await getDirectUrl(media.getAttribute('href'));
             mediaObj.docs.push(url);
         } else if (media.getAttribute('class') === 'post_link') { // посты из групп
             const url = Constants.MEDIA_PREFIX + media.getAttribute('href');
