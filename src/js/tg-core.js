@@ -6,8 +6,9 @@ const {sleep} = require('@mtproto/core/src/utils/common');
 class API {
     constructor() {
         this.mtproto = new MTProto({
-            api_id: 'xxxxxxxx',
-            api_hash: 'xxxxxxxx'
+            // публичные API ID и HASH!
+            api_id: '6',
+            api_hash: 'eb06d4abfb49dc3eeb1aeb98ae0f581e'
         });
     }
 
@@ -54,19 +55,11 @@ class API {
 export const api = new API();
 
 // Методы для авторизации
-// Получить текущего пользователя который взаимодействует с API
-export async function getUser() {
-    try {
-        const user = await api.call('users.getFullUser', {
-            id: {
-                _: 'inputUserSelf',
-            },
-        });
-
-        return user;
-    } catch (error) {
-        return null;
-    }
+// Получить информацию о пользователе по ID (inputUser). Можно получить для текущего через _: 'inputUserSelf'
+export async function getFullUser(id) {
+    return api.call('users.getFullUser', {
+        id: id
+    });
 }
 
 // Отправить код авторизации на телефон

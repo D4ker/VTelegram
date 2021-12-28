@@ -1,5 +1,6 @@
 const Emitter = require('./event-emitter').default;
 const Errors = require('./../constants').errors;
+const TgLib = require('./../tg-lib');
 
 const mainForm = new MainForm();
 export default mainForm;
@@ -84,7 +85,12 @@ class MainForm {
                 document.getElementById('main_form').classList.remove('hidden');
 
                 this.hideBody();
-                this._telegramAuth.show();
+                const result = TgLib.isAuthorized()
+                console.log(result)
+                if(!result)
+                    this._telegramAuth.show();
+                else
+                    this._settings.show();
             });
     }
 

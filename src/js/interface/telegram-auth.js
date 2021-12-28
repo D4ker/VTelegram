@@ -2,11 +2,15 @@ const Emitter = require('./event-emitter').default;
 
 const Errors = require('./../constants').errors;
 
+const TgLib = require('./../tg-lib')
+
 const telegramAuth = new TelegramAuth();
 export default telegramAuth;
 
 class TelegramAuth {
     _formInsertionPromise = undefined;
+    gPhoneCodeHash = '';
+    gPhone = '';
 
     constructor() {
         this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/telegram-auth-form.html'))
@@ -55,6 +59,9 @@ class TelegramAuth {
 
     clean() {
         this.clearPhoneValidationErrorHTML();
+
+        this.gPhoneCodeHash = '';
+        this.gPhone = '';
 
         document.getElementById('validation_phone').value = '';
         document.getElementById('validation_code').value = '';
@@ -114,22 +121,34 @@ class TelegramAuth {
             this.errorHandler(error);
     }
 
-    sendPhone(phone) {
-        //!!!!!!!!!!!! проверить телефон и отправить(ниже прост пример ошибки из инета)
-        if (!(/(\+7|8)[- _]*\(?[- _]*(\d{3}[- _]*\)?([- _]*\d){7}|\d\d[- _]*\d\d[- _]*\)?([- _]*\d){6})/g.test(phone)))
+    async sendPhone(phone) {
+        if (!(/^(\s*)?(\+)?\d{1,3}[ ]?[- ()]?\d{3}[- ()]?([- ]?\d){6,12}(\s*)?$/.test(phone)))
             return Errors.PHONE_FORMAT_ERROR;
+
+        const result = await TgLib.getCodeByPhone(phone)
+        if (result.state === 'err')
+            return result.data;
+        this.gPhone = phone;
+        this.gPhoneCodeHash = result.data;
+        return Errors.NO_ERROR;
+    }
+
+    async sendCode(code) {
+        if (!(/^[0-9]+$/.test(code)))
+            return Errors.PHONE_FORMAT_ERROR;
+
+        const result = await TgLib.authByCode(code, this.gPhone, this.gPhoneCodeHash);
+        if (result.state === 'err')
+            return result.data;
 
         return Errors.NO_ERROR;
     }
 
-    sendCode(code) {
-        //!!!!!!!!!!!!!! проверить код и отправить
-        //ниже пример якобы ошибки
-        return Errors.SESSION_PASSWORD_NEEDED
-    }
+    async sendPassword(password) {
+        const result = await TgLib.authByPass(password)
+        if (result.state === 'err')
+            return result.data;
 
-    sendPassword(password) {
-        //!!!!!!!!!! проверить пароль и отправить
         return Errors.NO_ERROR;
     }
 
@@ -259,7 +278,45 @@ class TelegramAuth {
                 break;
 
             case Errors.PHONE_FORMAT_ERROR:
-                this.phoneValidationErrorHTML('<b>Неверный номер телефона</b>.<br>Введите номер <b>в международном формате</b>. Например: +7 921 0000007');
+                this.phoneValidationErrorHTML('<b>Ошибка формата номера телефона</b>.<br>Введите номер <b>в международном формате</b> без лишних символов. Например: +7 921 0000007');
+                break;
+
+            case Errors.PHONE_NUMBER_FLOOD:
+                this.phoneValidationErrorHTML('<b>Превышено количество попыток получения кода</b>.<br>Вы выполняли этот запрос слишком часто. Пожалуйста, попробуйте позже');
+                break;
+
+            case Errors.PHONE_PASSWORD_FLOOD:
+                this.phoneValidationErrorHTML('<b>Превышено количество попыток входа для телефона</b>.<br>Вы выполняли этот запрос слишком часто. Пожалуйста, попробуйте позже');
+                break;
+
+            case Errors.PHONE_NUMBER_INVALID:
+                this.phoneValidationErrorHTML('<b>Ошибка идентификации пользователя по телефону</b>.<br>Возможно, номер введён некорректно или пользователя с таким номером не существует');
+                break;
+
+            case Errors.PHONE_NUMBER_UNOCCUPIED:
+                this.phoneValidationErrorHTML('<b>Пользователя с таким номером не существутет</b>.<br>Проверьте корректность номера телефона, либо зарегистрируйтесь в Telegram');
+                break;
+
+            case Errors.PHONE_CODE_FORMAT_ERROR:
+                this.phoneValidationErrorHTML('<b>Ошибка формата введённого кода</b>.<br>Удостоверьтесь в том, что не содержит каких-либо символов, кроме цифр');
+                break;
+
+            // Добавить resendCode???????????
+            case Errors.PHONE_CODE_INVALID:
+                this.phoneValidationErrorHTML('<b>Неправильный код</b>.<br>Проверьте корректность введённого кода или перезагрузите страницу, чтобы получить новый');
+                break;
+
+            // Добавить resendCode???????????
+            case Errors.PHONE_CODE_EXPIRED:
+                this.phoneValidationErrorHTML('<b>Истёк срок действия этого кода</b>.<br>Пожалуйста, перезагрузите страницу и введите новый код');
+                break;
+
+            case Errors.PASSWORD_HASH_INVALID:
+                this.phoneValidationErrorHTML('<b>Неправильный пароль</b>.<br>Проверьте корректность введённых вами данных');
+                break;
+
+            case Errors.UNEXPECTED_ERROR:
+                this.phoneValidationErrorHTML('<b>Упс... Что-то пошло не так!</b>.<br>Попробуйте перезагрузить страницу. Если проблема не решится – свяжитесь с разработчиками');
                 break;
 
             case Errors.SESSION_PASSWORD_NEEDED:
@@ -270,9 +327,8 @@ class TelegramAuth {
                 break;
 
             default:
-                throw new Error('No handlers occured.');
+                throw new Error('No handlers occurred.');
         }
-        ;
     }
-}; 
+}
 

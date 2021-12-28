@@ -95,6 +95,7 @@ function exportUrl(msgId, msgDateTime, msgSender, msgMediaData, vkDoc) {
     for (let media in mediaObj) {
         for (let url of mediaObj[media]) {
             gImportedText += `${msgDateTime} - ${msgSender}: <${media}> ::: ${url}\n`;
+            console.log(`${msgDateTime} - ${msgSender}: <${media}> ::: ${url}\n`);
         }
     }
 }
@@ -168,6 +169,7 @@ function sendData(dataJSON, dataHTML) {
 
         if (msgText) {
             gImportedText += `${msgDateTime} - ${msgSender}: ${msgText}\n`;
+            console.log(`${msgDateTime} - ${msgSender}: ${msgText}\n`);
         }
 
         if (msgMediaData.hasOwnProperty('attach_count')) {
@@ -310,12 +312,21 @@ async function createButton() {
         if (selID) {
             activeButton(exportButton, false);
             MainForm.show();
-//             if (selID[0] === 'c') {
-//                 await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
-//             } else {
-//                 await exportHistory(selID);
-//             }
-//             Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+            // if (selID[0] === 'c') {
+            //     await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
+            // } else {
+            //     await exportHistory(selID);
+            // }
+            // Lib.createFile(gImportedText, 'file.txt', 'plain/text');
+
+            // await TgLib.authorize()
+            // let invitationLink = prompt('Enter invitation link (https://t.me/+k-b1fZW60vE0ZmZi): ');
+            // const {gChat, users} = await TgLib.getUsersByInvitationLink(invitationLink);
+            // console.log(gChat);
+            // console.log(users);
+            // await TgLib.startImport(gChat, gImportedText);
+
+            // Lib.createFile(gImportedText, 'file.txt', 'plain/text');
             // await TgLib.runInterface(gImportedText);
             activeButton(exportButton, true);
         }
