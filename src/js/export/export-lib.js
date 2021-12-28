@@ -114,7 +114,7 @@ async function sendData(dataJSON, dataHTML) {
         }
 
         const msgMediaElement = msgData.media;
-        if (msgMediaInfo.hasOwnProperty('attach_count') && msgMediaElement !== null) {
+        if ((msgMediaInfo.hasOwnProperty('attach_count') || msgMediaInfo.hasOwnProperty('attach1')) && msgMediaElement !== null) {
             if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_URL_MODE) {
                 await ExportMedia.exportUrl(msgId, msgDateTime, msgSender, msgMediaElement);
             } else if (gImportedData.media_export_mode === Constants.EXPORT_MEDIA_CLOUD_MODE) {
