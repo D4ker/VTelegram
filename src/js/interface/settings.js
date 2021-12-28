@@ -1,5 +1,6 @@
 const Emitter = require('./event-emitter').default;
 const Constants = require('./../constants');
+const TgLib = require('./../tg-lib');
 const Errors = Constants.errors;
 
 const settings = new Settings();
@@ -69,7 +70,7 @@ class Settings {
                     (event) => {
                         const iddPopups = document.getElementsByClassName("idd_popup");
                         for (let popup of iddPopups) {
-                            var isClickInside = popup.contains(event.target);
+                            let isClickInside = popup.contains(event.target);
                             if (!isClickInside)
                                 popup.style.display = 'none';
                         }
@@ -80,8 +81,9 @@ class Settings {
                         Emitter.emit('event:settings-completed', {});
                     });
                 
-                formDom.getElementById('settings_exit_telegram_button').addEventListener('click', 
-                    (event) => {
+                formDom.getElementById('settings_exit_telegram_button').addEventListener('click',
+                    async (event) => {
+                        await TgLib.logOut()
                         Emitter.emit('event:telegram-exit', {});
                     });
                 
