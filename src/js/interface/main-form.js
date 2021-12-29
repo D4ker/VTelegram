@@ -81,7 +81,7 @@ class MainForm {
 
     show() {
         this._formInsertionPromise
-            .then(() => {
+            .then(async () => {
                 document.body.classList.add('layers_shown');
                 document.getElementById('box_layer_wrap').style.display = 'block';
                 document.getElementById('box_layer_bg').style.display = 'block';
@@ -89,7 +89,10 @@ class MainForm {
                 document.getElementById('main_form').classList.remove('hidden');
 
                 this.hideBody();
-                const result = TgLib.isAuthorized();
+
+                const result = await TgLib.isAuthorized();
+                console.log(result);
+
                 if (!result)
                     this._telegramAuth.show();
                 else

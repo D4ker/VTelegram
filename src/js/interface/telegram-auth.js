@@ -11,6 +11,7 @@ class TelegramAuth {
     _formInsertionPromise = undefined;
     gPhoneCodeHash = '';
     gPhone = '';
+    gFloodTime = '00:00:00';
 
     constructor() {
         this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/telegram-auth-form.html'))
@@ -25,19 +26,19 @@ class TelegramAuth {
                 formDom.getElementById('validation_send_password').addEventListener('click', this.sendPasswordHandler);
 
                 formDom.getElementById('validation_phone').addEventListener('keydown',
-                    (event) => {
+                    async (event) => {
                         if (event.keyCode == 10 || event.keyCode == 13)
-                            this.sendPhoneHandler(event);
+                            await this.sendPhoneHandler(event);
                     });
                 formDom.getElementById('validation_code').addEventListener('keydown',
-                    (event) => {
+                    async (event) => {
                         if (event.keyCode == 10 || event.keyCode == 13)
-                            this.sendCodeHandler(event);
+                            await this.sendCodeHandler(event);
                     });
                 formDom.getElementById('validation_password').addEventListener('keydown',
-                    (event) => {
+                    async (event) => {
                         if (event.keyCode == 10 || event.keyCode == 13)
-                            this.sendPasswordHandler(event);
+                            await this.sendPasswordHandler(event);
                     });
 
                 formDom.getElementById('validation_other_phone').addEventListener('click',
@@ -62,6 +63,7 @@ class TelegramAuth {
 
         this.gPhoneCodeHash = '';
         this.gPhone = '';
+        this.gFloodTime = '00:00:00';
 
         document.getElementById('validation_phone').value = '';
         document.getElementById('validation_code').value = '';
@@ -77,10 +79,10 @@ class TelegramAuth {
         this.hidePasswordBlock();
     }
 
-    sendPhoneHandler = event => {
+    sendPhoneHandler = async event => {
         let phone = document.getElementById('validation_phone').value;
 
-        let error = this.sendPhone(phone);
+        let error = await this.sendPhone(phone);
 
         if (error === Errors.NO_ERROR) {
             this.clearPhoneValidationErrorHTML();
@@ -92,10 +94,10 @@ class TelegramAuth {
             this.errorHandler(error);
     }
 
-    sendCodeHandler = event => {
+    sendCodeHandler = async event => {
         let code = document.getElementById('validation_code').value;
 
-        let error = this.sendCode(code);
+        let error = await this.sendCode(code);
 
         if (error === Errors.NO_ERROR) {
             //Если все ок, меняем окошко
@@ -107,10 +109,10 @@ class TelegramAuth {
             this.errorHandler(error);
     }
 
-    sendPasswordHandler = event => {
+    sendPasswordHandler = async event => {
         let password = document.getElementById('validation_password').value;
 
-        let error = this.sendPassword(password);
+        let error = await this.sendPassword(password);
 
         if (error === Errors.NO_ERROR) {
             this.clearPhoneValidationErrorHTML();
@@ -126,8 +128,12 @@ class TelegramAuth {
             return Errors.PHONE_FORMAT_ERROR;
 
         const result = await TgLib.getCodeByPhone(phone)
-        if (result.state === 'err')
+        console.log(result)
+        if (result.state === 'err') {
+            if (result.data === Errors.FLOOD_WAIT)
+                this.gFloodTime = result.time;
             return result.data;
+        }
         this.gPhone = phone;
         this.gPhoneCodeHash = result.data;
         return Errors.NO_ERROR;
@@ -317,6 +323,10 @@ class TelegramAuth {
 
             case Errors.UNEXPECTED_ERROR:
                 this.phoneValidationErrorHTML('<b>Упс... Что-то пошло не так!</b>.<br>Попробуйте перезагрузить страницу. Если проблема не решится – свяжитесь с разработчиками');
+                break;
+
+            case Errors.FLOOD_WAIT:
+                this.phoneValidationErrorHTML('<b>Лимит запросов исчерпан</b>.<br>Повторите запрос через ' + this.gFloodTime);
                 break;
 
             case Errors.SESSION_PASSWORD_NEEDED:

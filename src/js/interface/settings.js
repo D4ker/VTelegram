@@ -1,3 +1,5 @@
+import {getChatByInvitationLink} from "../tg-lib";
+
 const Emitter = require('./event-emitter').default;
 const Constants = require('./../constants');
 const TgLib = require('./../tg-lib');
@@ -9,6 +11,7 @@ export default settings;
 class Settings {
     _formInsertionPromise = undefined;
     _isCursorInsideIdd = false;
+    gChat = null;
 
     videoImportType = Constants.EXPORT_MEDIA_NONE;
     imageImportType = Constants.EXPORT_MEDIA_NONE;
@@ -108,7 +111,8 @@ class Settings {
         this._formInsertionPromise
             .then(() => {
                 this.clearConvAddressErrorHTML();
-                settings_addr.value = '';
+                this.gChat = null;
+
                 document.getElementById('settings_address_telegram').innerText = '';
                 document.getElementById('settings_address_telegram').nextSibling.textContent = 'Адрес не введен';
                 document.getElementById('settings_addr').value = '';
@@ -131,16 +135,11 @@ class Settings {
                 this.docImportType = Constants.EXPORT_MEDIA_NONE;
             });
     }
-
-    getConvAddress() {
-        return document.getElementById('settings_addr').value;
-    }
     
-    settingsAddressHandler = event => {
+    settingsAddressHandler = async (event) => {
         //!!!!! обработка ссылки на беседу телеграм
         let convLink = document.getElementById('settings_addr').value;
-        let convCode = convLink.slice(Constants.TELEGRAM_CNV_PATH.length, convLink.length);
-        let err = this.sendConvAddress(convCode);
+        let err = await this.sendConvAddress(convLink);
 
         if (err === Errors.NO_ERROR) {
             this.clearConvAddressErrorHTML();
@@ -172,7 +171,6 @@ class Settings {
                 (event) => {
                     this._isCursorInsideIdd = true;
                     event.target.classList.add('idd_hover');
-                    ;
                 });
 
             iddItem.addEventListener('mouseleave',
@@ -206,10 +204,15 @@ class Settings {
         document.getElementById('settings_error_addr').innerHTML = '';
     }
 
-    sendConvAddress(code) {
+    async sendConvAddress(link) {
         //!!!!!!!! здесь все отправляем и возвращаем ошибку
-        if (code.length === 0)
+        if (link.length === 0)
             return Errors.EMPTY_VALUE;
+        const result = await TgLib.getChatByInvitationLink(link)
+        if (result.state === 'err') {
+            return result.data;
+        }
+        this.gChat = result.data;
 
         return Errors.NO_ERROR;
     }
@@ -253,7 +256,7 @@ class Settings {
             default:
                 throw new Error('VTelegram error: setImportToNone: No handler occured for type: ' + type);
                 
-        };
+        }
     }
     
     changeTypeImport(elem) {
@@ -276,26 +279,23 @@ class Settings {
             default:
                 throw new Error('VTelegram error: changeTypeImport: No handler occured for file type: ' + fileType);
                 
-        };
+        }
     }
 
     strToImportType(str) {
         switch (str) {
             case 'idd_item_drive_links':
                 return Constants.EXPORT_MEDIA_CLOUD_MODE;
-                break;
-                
+
             case 'idd_item_direct':
                 return Constants.EXPORT_MEDIA_BOT_MODE;
-                break;
-                
+
             case 'idd_item_vk_links':
                 return Constants.EXPORT_MEDIA_URL_MODE;
-                break;
-                
+
             default:
                 throw new Error('VTelegram error: strToImportType: No handler occured for import type: ' + str);
-        };
+        }
     }
     
     errorHandler(err) {
@@ -303,6 +303,22 @@ class Settings {
             case Errors.EMPTY_VALUE:
                 this.clearConvAddressErrorHTML();
                 this.convAddressErrorHTML('<b>Поле пустое.</b> Введите код беседы или нажмите Отмена.');
+                break;
+
+            case Errors.INVITE_HASH_INVALID:
+                this.convAddressErrorHTML('<b>Ошибка инвайт-линка.</b> Чат не существует, либо ссылка не верна.');
+                break;
+
+            case Errors.INVITE_HASH_EXPIRED:
+                this.convAddressErrorHTML('<b>Ссылка истекла.</b> Введите новую ссылку.');
+                break;
+
+            case Errors.INVITE_HASH_EMPTY:
+                this.convAddressErrorHTML('<b>Ошибка формата.</b> Ссылка должна содержать в себе tg.me/.');
+                break;
+
+            case Errors.UNEXPECTED_ERROR:
+                this.convAddressErrorHTML('<b>Упс... Что-то пошло не так!</b> Неизвестная ошибка.');
                 break;
 
             case Errors.NO_ERROR:
