@@ -78,7 +78,7 @@ function getToken() {
         try {
             chrome.identity.getAuthToken({ interactive: true }, token => resolve(token));
         } catch(err) {
-            reject(ex);
+            reject(err);
         }
     });
 }

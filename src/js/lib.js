@@ -21,7 +21,7 @@ export async function request(url, method = 'GET', data = null) {
         body: body
     });
 
-    return transformWindows1251ToUTF8(response);
+    return response.headers.get('Content-Type').includes('application/json') ? transformWindows1251ToUTF8(response) : response;
 }
 
 // Функция для форматирования даты

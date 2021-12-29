@@ -1,6 +1,8 @@
 const Emitter = require('./event-emitter').default;
 const Errors = require('./../constants').errors;
+
 const TgLib = require('./../tg-lib');
+const ExportLib = require("./../export/export-lib");
 
 const mainForm = new MainForm();
 export default mainForm;
@@ -25,7 +27,7 @@ class MainForm {
 
                 document.addEventListener('click',
                     (event) => {
-                        var isClickInside = main_form.contains(event.target);
+                        let isClickInside = main_form.contains(event.target);
                         if (!isClickInside)
                             this.close();
                     }, true);
@@ -54,10 +56,12 @@ class MainForm {
                     this._settings.show();
                 });
 
+                // Начинаем экспорт, а затем импорт
                 this._startImport = require('./start-import').default;
                 Emitter.subscribe('event:start-import', data => {
-                    //!!!!!!! здесь берем все данные и начинаем импорт
                     this.close();
+                    ExportLib.startExport();
+                    // !!!!! здесь импорт
                 });
                 Emitter.subscribe('event:start-import-back', data => {
                     this.hideBody();
@@ -85,8 +89,10 @@ class MainForm {
                 document.getElementById('main_form').classList.remove('hidden');
 
                 this.hideBody();
+
                 const result = await TgLib.isAuthorized();
                 console.log(result);
+
                 if (!result)
                     this._telegramAuth.show();
                 else

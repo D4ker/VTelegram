@@ -1,6 +1,7 @@
 export const requestURL = {
-    'start_history': 'https://vk.com/al_im.php?act=a_start',
-    'history': 'https://vk.com/al_im.php?act=a_history'
+    start_history: 'https://vk.com/al_im.php?act=a_start',
+    history: 'https://vk.com/al_im.php?act=a_history',
+    video: 'https://vk.com/al_video.php?act=show'
 };
 
 // Сколько сообщений приходит в самом начале
@@ -20,7 +21,7 @@ export const EXPORT_MEDIA_URL_MODE = 0;
 export const EXPORT_MEDIA_CLOUD_MODE = 1;
 export const EXPORT_MEDIA_BOT_MODE = 2;
 
-export const MEDIA_PREFIX = 'vk.com';
+export const MEDIA_PREFIX = 'https://vk.com';
 
 export const docTypes = [
     'page_doc_title', // документ (в том числе видео-документ)
@@ -59,4 +60,13 @@ export const errors = {
     INVITE_HASH_EMPTY: "Отправлена пустая строка (неверный формат инвайт линка)",
     INVITE_HASH_EXPIRED: "Истёк срок годности инвайт линка",
     INVITE_HASH_INVALID: "Инвайт линк не корректен"
+};
+
+export const msgBackgroundType = {
+    DEFAULT: 0,
+    START_EXPORT: 1
+};
+
+export const msgContentType = {
+    DEFAULT: 0
 };
