@@ -30,10 +30,11 @@
         "tabs",
         "identity",
         "storage",
-        "https://www.googleapis.com/*"
+        "https://www.googleapis.com/*",
+        "https://my.telegram.org/apps/*"
     ],
     "oauth2": {
-        "client_id": "516717924129-nn1i5d4nagfp20c0dcfu38jue2n0rd07.apps.googleusercontent.com",
+        "client_id": "516717924129-pcm31all0chsqiktm1rrle98m0ekrbmm.apps.googleusercontent.com",
         "scopes": [
             "https://www.googleapis.com/auth/drive"
         ]

@@ -1,6 +1,8 @@
 const Emitter = require('./event-emitter').default;
 const Errors = require('./../constants').errors;
+
 const TgLib = require('./../tg-lib');
+const ExportLib = require("./../export/export-lib");
 
 const mainForm = new MainForm();
 export default mainForm;
@@ -22,10 +24,10 @@ class MainForm {
                 let formDom = new DOMParser().parseFromString(data, 'text/html');
                 formDom.getElementsByClassName('box_x_button')[0].addEventListener('click', event => this.close());
                 document.getElementById('box_layer').appendChild(formDom.body.firstElementChild);
-                
-                document.addEventListener('click', 
+
+                document.addEventListener('click',
                     (event) => {
-                        var isClickInside = main_form.contains(event.target);
+                        let isClickInside = main_form.contains(event.target);
                         if (!isClickInside)
                             this.close();
                     }, true);
@@ -54,16 +56,18 @@ class MainForm {
                     this._settings.show();
                 });
 
+                // Начинаем экспорт, а затем импорт
                 this._startImport = require('./start-import').default;
                 Emitter.subscribe('event:start-import', data => {
-                    //!!!!!!! здесь берем все данные и начинаем импорт
                     this.close();
+                    ExportLib.startExport();
+                    // !!!!! здесь импорт
                 });
                 Emitter.subscribe('event:start-import-back', data => {
                     this.hideBody();
                     this._peopleImport.show();
                 });
-                
+
                 Emitter.subscribe('event:telegram-exit', data => {
                     this.hideBody();
                     this._telegramAuth.clean();
@@ -85,9 +89,8 @@ class MainForm {
                 document.getElementById('main_form').classList.remove('hidden');
 
                 this.hideBody();
-                const result = TgLib.isAuthorized()
-                console.log(result)
-                if(!result)
+                const result = TgLib.isAuthorized();
+                if (!result)
                     this._telegramAuth.show();
                 else
                     this._settings.show();

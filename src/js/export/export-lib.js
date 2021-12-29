@@ -192,3 +192,22 @@ export async function exportHistory(peer) {
         await sendData(jsonStartData['payload'][1][0]['msgs'], jsonStartData['payload'][1][0]['history']);
     }
 }
+
+export function startExport() {
+    const urlParams = new URLSearchParams(location.search);
+    const selID = urlParams.get(Constants.VK_MSG_ID_PARAM);
+
+    if (selID) {
+        let peer = '';
+        if (selID[0] === 'c') {
+            peer = Constants.CONVERSATION_START_ID + parseInt(selID.slice(1));
+        } else {
+            peer = selID;
+        }
+
+        chrome.runtime.sendMessage({
+            type: Constants.msgBackgroundType.START_EXPORT,
+            text: peer
+        });
+    }
+}
