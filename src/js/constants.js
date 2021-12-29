@@ -20,7 +20,7 @@ export const EXPORT_MEDIA_URL_MODE = 0;
 export const EXPORT_MEDIA_CLOUD_MODE = 1;
 export const EXPORT_MEDIA_BOT_MODE = 2;
 
-export const MEDIA_PREFIX = 'vk.com';
+export const MEDIA_PREFIX = 'https://vk.com';
 
 export const docTypes = [
     'page_doc_title', // документ (в том числе видео-документ)
