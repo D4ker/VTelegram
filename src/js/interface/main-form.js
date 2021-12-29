@@ -1,6 +1,6 @@
 const Emitter = require('./event-emitter').default;
 const Errors = require('./../constants').errors;
-
+const Settings = require('./settings').default;
 const TgLib = require('./../tg-lib');
 const ExportLib = require("./../export/export-lib");
 
@@ -58,10 +58,11 @@ class MainForm {
 
                 // Начинаем экспорт, а затем импорт
                 this._startImport = require('./start-import').default;
-                Emitter.subscribe('event:start-import', data => {
+                Emitter.subscribe('event:start-import', async data => {
                     this.close();
                     ExportLib.startExport();
                     // !!!!! здесь импорт
+                    await TgLib.startImport(Settings.gChat, ExportLib.gImportedData.text);
                 });
                 Emitter.subscribe('event:start-import-back', data => {
                     this.hideBody();
