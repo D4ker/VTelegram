@@ -11,6 +11,7 @@ class TelegramAuth {
     _formInsertionPromise = undefined;
     gPhoneCodeHash = '';
     gPhone = '';
+    gFloodTime = '00:00:00';
 
     constructor() {
         this._formInsertionPromise = fetch(chrome.runtime.getURL('./src/html/telegram-auth-form.html'))
@@ -62,6 +63,7 @@ class TelegramAuth {
 
         this.gPhoneCodeHash = '';
         this.gPhone = '';
+        this.gFloodTime = '00:00:00';
 
         document.getElementById('validation_phone').value = '';
         document.getElementById('validation_code').value = '';
@@ -126,8 +128,12 @@ class TelegramAuth {
             return Errors.PHONE_FORMAT_ERROR;
 
         const result = await TgLib.getCodeByPhone(phone)
-        if (result.state === 'err')
+        console.log(result)
+        if (result.state === 'err') {
+            if (result.data === Errors.FLOOD_WAIT)
+                this.gFloodTime = result.time;
             return result.data;
+        }
         this.gPhone = phone;
         this.gPhoneCodeHash = result.data;
         return Errors.NO_ERROR;
@@ -317,6 +323,10 @@ class TelegramAuth {
 
             case Errors.UNEXPECTED_ERROR:
                 this.phoneValidationErrorHTML('<b>Упс... Что-то пошло не так!</b>.<br>Попробуйте перезагрузить страницу. Если проблема не решится – свяжитесь с разработчиками');
+                break;
+
+            case Errors.FLOOD_WAIT:
+                this.phoneValidationErrorHTML('<b>Лимит запросов исчерпан</b>.<br>Повторите запрос через ' + this.gFloodTime);
                 break;
 
             case Errors.SESSION_PASSWORD_NEEDED:

@@ -80,6 +80,21 @@ export async function getCodeByPhone(phone) {
         return {state: 'ok', data: phone_code_hash};
     } catch (error){
         console.log('error:', error)
+
+        if (error.error_message.includes('FLOOD_WAIT_')) {
+            let seconds = parseInt(error.error_message.split('LOOD_WAIT_')[1]);
+            let hours = Math.floor(seconds / 60 / 60);
+            let minutes = Math.floor(seconds / 60) - (hours * 60);
+            seconds = seconds % 60;
+
+            let time = [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+            return {state: 'err', data: Errors.FLOOD_WAIT, time: time};
+        }
+
         switch (error.error_message){
             case 'PHONE_NUMBER_INVALID':
                 return {state: 'err', data: Errors.PHONE_NUMBER_INVALID}
@@ -164,19 +179,38 @@ export async function logOut() {
 
 // Принимает инвайт линк (https://t.me/+v0F9TuhlPaxjMjMy) с помощью которого выбирается чат
 // Возвращает объект чата и его пользователей чата
-export async function getUsersByInvitationLink(invitationLink) {
+export async function getChatByInvitationLink(invitationLink) {
     let invitationHash = '';
+    try{
+        if (invitationLink.includes('.me/+'))
+            invitationHash = invitationLink.split('.me/+')[1];
+        else if (invitationLink.includes('joinchat/'))
+            invitationHash = invitationLink.split('joinchat/')[1];
+        else
+            invitationHash = invitationLink.split('.me/')[1];
+        console.log(invitationHash)
 
-    if (invitationLink.includes('.me/+'))
-        invitationHash = invitationLink.split('.me/+')[1];
-    else if (invitationLink.includes('joinchat/'))
-        invitationHash = invitationLink.split('joinchat/')[1];
-    else
-        invitationHash = invitationLink.split('.me/')[1];
+        const gChat = await TgCore.checkChatInvite(invitationHash);
+        console.log(gChat);
 
-    const gChat = await TgCore.checkChatInvite(invitationHash);
-    console.log(gChat);
+        return {state: 'ok', data: gChat};
+    } catch (error){
+        console.log('error:', error)
+        switch (error.error_message) {
+            case 'INVITE_HASH_INVALID':
+                return {state: 'err', data: Errors.INVITE_HASH_INVALID}
+            case 'INVITE_HASH_EXPIRED':
+                return {state: 'err', data: Errors.INVITE_HASH_EXPIRED}
+            case 'INVITE_HASH_EMPTY':
+                return {state: 'err', data: Errors.INVITE_HASH_EMPTY}
+            default:
+                return {state: 'err', data: Errors.UNEXPECTED_ERROR}
+        }
+    }
+}
 
+// Получить всех пользователей из беседы
+export async function getUsersByChat(gChat) {
     if(gChat.chat._ === "chat") {
         const participants = await TgCore.getFullChat(gChat.chat.id);
         console.log(participants);
@@ -247,7 +281,6 @@ export async function startImport(gChat, data) {
         peer: inputPeer,
         import_id: initHistoryCallback.id
     }));
-
 }
 
 // загрузка inputFile на сервер с разбиением (для текста и изображений)

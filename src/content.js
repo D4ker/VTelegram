@@ -5,6 +5,7 @@ const Constants = require('./js/constants');
 const Lib = require('./js/lib');
 
 const TgLib = require('./js/tg-lib');
+const TgCore = require('./js/tg-core');
 
 const MainForm = require('./js/interface/main-form').default;
 
@@ -311,6 +312,24 @@ async function createButton() {
         const selID = urlParams.get(Constants.VK_MSG_ID_PARAM);
         if (selID) {
             activeButton(exportButton, false);
+
+            // const {phone_code_hash} = await TgCore.sendCode('9996619999');
+            // const signInResult = await TgCore.signIn({
+            //     code: '11111',
+            //     phone: '9996619999',
+            //     phone_code_hash: phone_code_hash
+            // });
+            // console.log(signInResult)
+            //
+            // if (signInResult._ === 'auth.authorizationSignUpRequired') {
+            //     await TgCore.signUp({
+            //         phone_number: '9996619999',
+            //         phone_code_hash: phone_code_hash,
+            //         first_name: 'MTProto',
+            //         last_name: 'TestUser'
+            //     });
+            // }
+
             MainForm.show();
             // if (selID[0] === 'c') {
             //     await exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));

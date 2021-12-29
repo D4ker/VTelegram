@@ -1,4 +1,5 @@
 // методы для взаимодействия c Tg API
+const Config = require('../../config.json');
 const MTProto = require('@mtproto/core/envs/browser');
 const {sleep} = require('@mtproto/core/src/utils/common');
 
@@ -6,9 +7,9 @@ const {sleep} = require('@mtproto/core/src/utils/common');
 class API {
     constructor() {
         this.mtproto = new MTProto({
-            // публичные API ID и HASH!
-            api_id: '6',
-            api_hash: 'eb06d4abfb49dc3eeb1aeb98ae0f581e'
+            api_id: '10513198',
+            api_hash: 'a646a2532e0e8b0e0603ea35146f8888',
+            test: true,
         });
     }
 
@@ -53,6 +54,15 @@ class API {
 }
 
 export const api = new API();
+
+export function signUp({phone_number, phone_code_hash, first_name, last_name}) {
+    return api.call('auth.signUp', {
+        phone_number: phone_number,
+        phone_code_hash: phone_code_hash,
+        first_name: first_name,
+        last_name: last_name,
+    });
+}
 
 // Методы для авторизации
 // Получить информацию о пользователе по ID (inputUser). Можно получить для текущего через _: 'inputUserSelf'

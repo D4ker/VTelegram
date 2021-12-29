@@ -2,6 +2,7 @@ const Emitter = require('./event-emitter').default;
 const Constants = require('./../constants');
 const Errors = Constants.errors;
 const Lib = require('./../lib');
+const Settings = require('./settings').default;
 
 const peopleImport = new PeopleImport();
 export default peopleImport;
@@ -40,6 +41,7 @@ class PeopleImport {
             .then(() => {
                 people_import_form.classList.remove('hidden');
 
+                console.log(Settings.gChat)
                 if (!this._usersLoaded) {
                     this.loadConversationMembers();
                     this._usersLoaded = true;

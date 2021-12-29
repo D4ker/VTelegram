@@ -54,4 +54,9 @@ export const errors = {
 
     UNEXPECTED_ERROR: "Какая-то необрабатываемая ошибка",
     EMPTY_VALUE: "Не введено значение",
+    FLOOD_WAIT: "Слишком много запросов, ожидайте",
+
+    INVITE_HASH_EMPTY: "Отправлена пустая строка (неверный формат инвайт линка)",
+    INVITE_HASH_EXPIRED: "Истёк срок годности инвайт линка",
+    INVITE_HASH_INVALID: "Инвайт линк не корректен"
 };
