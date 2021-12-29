@@ -6,7 +6,7 @@ const ExportLib = require("./export-lib");
 
 // Получение прямой ссылки на документ
 async function getDirectUrl(url) {
-    let directUrl = Constants.MEDIA_PREFIX + url;
+    let directUrl = url;
     // Контроллер для прерывания скачивания медиа, не содержащихся в html коде
     let controller = new AbortController();
     const result = await fetch(url, {
@@ -96,7 +96,7 @@ async function getMediaUrls(msgId, msgMediaElement) {
                 mediaObj.videos.push(url);
             }
         } else if (Constants.docTypes.filter(value => media.classList.contains(value)).length !== 0) { // документы
-            const url = await getDirectUrl(media.getAttribute('href'));
+            const url = await getDirectUrl(Constants.MEDIA_PREFIX + media.getAttribute('href'));
             mediaObj.docs.push(url);
         } else if (media.getAttribute('class') === 'post_link') { // посты из групп
             const url = Constants.MEDIA_PREFIX + media.getAttribute('href');

@@ -65,13 +65,27 @@ function createButton() {
         if (selID) {
             activeButton(exportButton, false);
             // MainForm.show();
+
+            let peer = '';
             if (selID[0] === 'c') {
-                await ExportLib.exportHistory(Constants.CONVERSATION_START_ID + parseInt(selID.slice(1)));
+                peer = Constants.CONVERSATION_START_ID + parseInt(selID.slice(1));
             } else {
-                await ExportLib.exportHistory(selID);
+                peer = selID;
             }
-            Lib.createFile(ExportLib.gImportedData.text, 'file.txt', 'plain/text');
-            // await TgLib.runInterface(gImportedText);
+            chrome.runtime.sendMessage({
+                type: Constants.msgBackgroundType.START_EXPORT,
+                text: peer
+            });
+
+            // await TgLib.authorize()
+            // let invitationLink = prompt('Enter invitation link (https://t.me/+k-b1fZW60vE0ZmZi): ');
+            // const {gChat, users} = await TgLib.getUsersByInvitationLink(invitationLink);
+            // console.log(gChat);
+            // console.log(users);
+            // await TgLib.startImport(gChat, ExportLib.gImportedData.text);
+
+            // await TgLib.runInterface(ExportLib.gImportedData.text);
+
             activeButton(exportButton, true);
         }
     }

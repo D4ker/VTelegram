@@ -36,3 +36,12 @@ export const errors = {
     EMPTY_VALUE: "Не введено значение",
     SESSION_PASSWORD_NEEDED: "Ошибка авторизации, требуется пароль"
 };
+
+export const msgBackgroundType = {
+    DEFAULT: 0,
+    START_EXPORT: 1
+};
+
+export const msgContentType = {
+    DEFAULT: 0
+};
