@@ -1,9 +1,12 @@
+// Код Влада
+// обёртка для удобного использования API
+
 const Lib = require('./lib');
 const TgCore = require('./tg-core');
-
 const CryptoJS = require('crypto-js');
+const Errors = require('./constants').errors
 
-// процесс авторизации
+// Запускает процесс авторизации
 export async function authorize() {
     const user = await TgCore.getUser();
 
@@ -37,8 +40,9 @@ export async function authorize() {
             }
 
             // 2FA
-
-            const password = 'USER_PASSWORD';
+            // заменить
+            const password = prompt('Enter password for 2FA: ');
+            console.log('You entered ' + password);
 
             const {srp_id, current_algo, srp_B} = await TgCore.getPassword();
             const {g, p, salt1, salt2} = current_algo;
@@ -57,39 +61,199 @@ export async function authorize() {
     }
 }
 
-export async function runInterface(fileText) {
-    await authorize();
+// Авторизация
+// Проверяет авторизован ли пользователь
+export async function isAuthorized() {
+    try {
+        const id = {_: 'inputUserSelf'}
+        const user = await TgCore.getFullUser(id);
+        return user;
+    }catch (error){
+        return null
+    }
+}
 
-    const chat = await TgCore.api.call('messages.checkChatInvite', {
-        hash: 'sg1KIzmWisc5ZGVi'
-    });
+// Запрос кода по номеру телефона
+export async function getCodeByPhone(phone) {
+    try {
+        const {phone_code_hash} = await TgCore.sendCode(phone);
+        return {state: 'ok', data: phone_code_hash};
+    } catch (error){
+        console.log('error:', error)
+        switch (error.error_message){
+            case 'PHONE_NUMBER_INVALID':
+                return {state: 'err', data: Errors.PHONE_NUMBER_INVALID}
+            case 'PHONE_NUMBER_FLOOD':
+                return {state: 'err', data: Errors.PHONE_NUMBER_FLOOD}
+            case 'PHONE_PASSWORD_FLOOD':
+                return {state: 'err', data: Errors.PHONE_PASSWORD_FLOOD}
+            default:
+                return {state: 'err', data: Errors.UNEXPECTED_ERROR}
+        }
+    }
+}
 
-    const inputPeer = {
+// Авторизация с помощью кода (без 2FA)
+export async function authByCode(code, phone, phone_code_hash){
+    try {
+        const signInResult = await TgCore.signIn({
+            code,
+            phone,
+            phone_code_hash,
+        });
+
+        if (signInResult._ === 'auth.authorizationSignUpRequired') {
+            console.log(`error:`, signInResult._);
+            return {state: 'err', data: Errors.PHONE_NUMBER_UNOCCUPIED};
+        }
+
+        return {state: 'ok', data: signInResult}
+    } catch (error) {
+        console.log('error:', error)
+        switch (error.error_message){
+            case 'PHONE_NUMBER_UNOCCUPIED':
+                return {state: 'err', data: Errors.PHONE_NUMBER_UNOCCUPIED}
+            case 'PHONE_NUMBER_INVALID':
+                return {state: 'err', data: Errors.PHONE_NUMBER_INVALID}
+            case 'PHONE_CODE_EXPIRED':
+                return {state: 'err', data: Errors.PHONE_CODE_EXPIRED}
+            case 'PHONE_CODE_INVALID':
+                return {state: 'err', data: Errors.PHONE_CODE_INVALID}
+            case 'SESSION_PASSWORD_NEEDED':
+                return {state: 'err', data: Errors.SESSION_PASSWORD_NEEDED}
+            default:
+                return {state: 'err', data: Errors.UNEXPECTED_ERROR}
+        }
+    }
+}
+
+// Авторизация с паролем (для 2FA)
+export async function authByPass(password) {
+    try{
+        const {srp_id, current_algo, srp_B} = await TgCore.getPassword();
+        const {g, p, salt1, salt2} = current_algo;
+
+        const {A, M1} = await TgCore.api.mtproto.crypto.getSRPParams({
+            g,
+            p,
+            salt1,
+            salt2,
+            gB: srp_B,
+            password,
+        });
+
+        const checkPasswordResult = await TgCore.checkPassword({srp_id, A, M1});
+        return {state: 'ok', data: checkPasswordResult}
+    } catch (error) {
+        console.log('error:', error)
+        switch (error.error_message) {
+            case 'PASSWORD_HASH_INVALID':
+                return {state: 'err', data: Errors.PASSWORD_HASH_INVALID}
+            default:
+                return {state: 'err', data: Errors.UNEXPECTED_ERROR}
+        }
+    }
+}
+
+// Выход из аккаунта пользователя
+export async function logOut() {
+    console.log('User logged out')
+    return TgCore.logOut()
+}
+
+
+// Принимает инвайт линк (https://t.me/+v0F9TuhlPaxjMjMy) с помощью которого выбирается чат
+// Возвращает объект чата и его пользователей чата
+export async function getUsersByInvitationLink(invitationLink) {
+    let invitationHash = '';
+
+    if (invitationLink.includes('.me/+'))
+        invitationHash = invitationLink.split('.me/+')[1];
+    else if (invitationLink.includes('joinchat/'))
+        invitationHash = invitationLink.split('joinchat/')[1];
+    else
+        invitationHash = invitationLink.split('.me/')[1];
+
+    const gChat = await TgCore.checkChatInvite(invitationHash);
+    console.log(gChat);
+
+    if(gChat.chat._ === "chat") {
+        const participants = await TgCore.getFullChat(gChat.chat.id);
+        console.log(participants);
+
+        return {state: 'ok', gChat:gChat, users:participants.users};
+    } else if(gChat.chat._ === "channel") {
+        const inputChannel = {
+            _: 'inputChannel',
+            channel_id: gChat.chat.id,
+            access_hash: gChat.chat.access_hash
+        };
+        const channelParticipantsFilter = {
+            _: 'channelParticipantsSearch',
+            q: ''
+        };
+        const participants = await TgCore.getParticipants({
+            channel: inputChannel,
+            filter: channelParticipantsFilter,
+            offset: 0,
+            limit: 200,
+            hash: 0
+        });
+        console.log(participants)
+
+        return {state: 'ok', gChat:gChat, users:participants.users};
+    }else{
+        // Ошибка получения канала по ссылке (тип не чат и не канал)
+        return {state: 'err', gChat:'', users:''};
+    }
+}
+
+// Запускает процесс импорта после всех настроек
+export async function startImport(gChat, data) {
+    console.log(await TgCore.checkHistoryImport(data));
+
+    let inputPeer = null;
+    if(gChat.chat._ === "chat") {
+        inputPeer = {
+            _: 'inputPeerChat',
+            chat_id: gChat.chat.id,
+        };
+    }else if(gChat.chat._ === "channel"){
+        inputPeer = {
+            _: 'inputPeerChannel',
+            channel_id: gChat.chat.id,
+            access_hash: gChat.chat.access_hash
+        };
+    }else{
+        return false;
+    }
+    console.log(await TgCore.checkHistoryImportPeer(inputPeer));
+
+    const inputFile = await upload_file(data, 'import_file.txt');
+
+    inputPeer = {
         _: 'inputPeerChannel',
-        channel_id: chat.chat.id,
-        access_hash: chat.chat.access_hash
+        channel_id: gChat.chat.id,
+        access_hash: gChat.chat.access_hash
     };
-
-    console.log(chat);
-    console.log(inputPeer);
-
-    const check = await TgCore.api.call('messages.checkHistoryImport', {
-        import_head: fileText.slice(0, 100)
+    let initHistoryCallback = await TgCore.initHistoryImport({
+        peer: inputPeer,
+        file: inputFile,
+        media: 0, // изменить
     });
-    console.log(check);
+    console.log(initHistoryCallback)
 
-    // const file = createFile(gImportedText, 'console.txt', 'text/plain');
+    console.log(await TgCore.startHistoryImport({
+        peer: inputPeer,
+        import_id: initHistoryCallback.id
+    }));
 
-    const checkPeer = await TgCore.api.call('messages.checkHistoryImportPeer', {
-        peer: inputPeer
-    });
+}
 
-    console.log(checkPeer);
-
-    const byteTextArray = Lib.toUTF8Array(fileText);
-
+// загрузка inputFile на сервер с разбиением (для текста и изображений)
+async function upload_file(data, name) {
+    const byteTextArray = Lib.toUTF8Array(data);
     const byteTextArrayLength = byteTextArray.length;
-
     const fileId = Date.now();
     let filePart = 524288;
 
@@ -111,25 +275,11 @@ export async function runInterface(fileText) {
         _: 'inputFile',
         id: fileId,
         parts: part,
-        name: 'import_file.txt',
-        md5_checksum: CryptoJS.MD5(fileText)
+        name: name,
+        md5_checksum: CryptoJS.MD5(data)
     };
 
     console.log('pre-init');
 
-    const initHistoryImport = await TgCore.api.call('messages.initHistoryImport', {
-        peer: inputPeer,
-        file: inputFile,
-        media_count: 0
-    });
-
-    console.log('init');
-    console.log(initHistoryImport);
-
-    const historyImport = await TgCore.api.call('messages.startHistoryImport', {
-        peer: inputPeer,
-        import_id: initHistoryImport.id
-    });
-
-    console.log(historyImport);
+    return inputFile;
 }

@@ -1,3 +1,5 @@
+const Config = require('../../config.json');
+
 // методы для взаимодействия c Tg API
 const MTProto = require('@mtproto/core/envs/browser');
 const {sleep} = require('@mtproto/core/src/utils/common');
@@ -5,10 +7,7 @@ const {sleep} = require('@mtproto/core/src/utils/common');
 // API обработчик ошибок
 class API {
     constructor() {
-        this.mtproto = new MTProto({
-            api_id: 'xxxxxxxx',
-            api_hash: 'xxxxxxxx'
-        });
+        this.mtproto = new MTProto(Config.telegram_api);
     }
 
     async call(method, params, options = {}) {
@@ -53,21 +52,15 @@ class API {
 
 export const api = new API();
 
-// методы для авторизации
-export async function getUser() {
-    try {
-        const user = await api.call('users.getFullUser', {
-            id: {
-                _: 'inputUserSelf',
-            },
-        });
-
-        return user;
-    } catch (error) {
-        return null;
-    }
+// Методы для авторизации
+// Получить информацию о пользователе по ID (inputUser). Можно получить для текущего через _: 'inputUserSelf'
+export async function getFullUser(id) {
+    return api.call('users.getFullUser', {
+        id: id
+    });
 }
 
+// Отправить код авторизации на телефон
 export function sendCode(phone) {
     return api.call('auth.sendCode', {
         phone_number: phone,
@@ -77,6 +70,7 @@ export function sendCode(phone) {
     });
 }
 
+// Вход по коду, телефону и ответу метода sendCode()
 export function signIn({code, phone, phone_code_hash}) {
     return api.call('auth.signIn', {
         phone_code: code,
@@ -85,10 +79,12 @@ export function signIn({code, phone, phone_code_hash}) {
     });
 }
 
+// Получить пароль аккаунта в зашифрованном виде
 export function getPassword() {
     return api.call('account.getPassword');
 }
 
+// Сравнить введённый пароль с зашифрованным из функции getPassword()
 export function checkPassword({srp_id, A, M1}) {
     return api.call('auth.checkPassword', {
         password: {
@@ -98,6 +94,11 @@ export function checkPassword({srp_id, A, M1}) {
             M1,
         },
     });
+}
+
+// Выход из аккаунта пользователя
+export function logOut() {
+    return api.call('auth.logOut')
 }
 
 // Методы для импорта в Tg
@@ -135,9 +136,103 @@ export function uploadImportedMedia({peer, import_id, file_name, media}) {
 }
 
 // 5 этап: запуск процесса импорта, опять передаём чат и id импорта
-export function startHistoryImport(peer, import_id) {
+export function startHistoryImport({peer, import_id}) {
     return api.call('messages.startHistoryImport', {
         peer: peer,
         import_id: import_id
     });
+}
+
+// Работа с пользователями
+// Добавить пользователя в беседу по inputUser
+export function inviteToChannel ({channel, users}) {
+    return api.call('channels.inviteToChannel', {
+        channel: channel,
+        users: users
+    })
+}
+
+// Получение user_id из @username для добавления в беседу
+export function resolveUsername(username) {
+    return api.call('contacts.resolveUsername', {
+        username: username
+    })
+}
+
+// Ищет user_id по @username?????
+export function search({q, limit}) {
+    return api.call('contacts.search', {
+        q: q,
+        limit: limit
+    })
+}
+
+// Получение user_id по номеру телефона (inputPhoneContact)
+export function importContacts(contacts) {
+    return api.call('contacts.importContacts', {
+        contacts: contacts
+    })
+}
+
+// Работа с чатами и каналами
+// Методы для получения chat_id по инвайт линку (валидация линка и получение инфы)
+export function checkChatInvite(hash) {
+    return api.call('messages.checkChatInvite', {
+        hash: hash
+    });
+}
+
+// Создать канал
+export function createChannel({flags, broadcast, megagroup, for_import, title, about, geo_point, address}) {
+    return api.call('channels.createChannel', {
+        flags: flags,
+        broadcast: broadcast,
+        megagroup: megagroup,
+        for_import: for_import,
+        title: title,
+        about: about,
+        geo_point: geo_point,
+        address: address
+    })
+}
+
+// Метод для получения всех участников из КАНАЛА
+export function getParticipants({channel, filter, offset, limit, hash}) {
+    return api.call('channels.getParticipants', {
+        channel: channel,
+        filter: filter,
+        offset: offset,
+        limit: limit,
+        hash: hash
+    });
+}
+
+// Метод получения всех участников из ЧАТА
+export function getFullChat(chat_id) {
+    return api.call('messages.getFullChat', {
+        chat_id: chat_id
+    })
+}
+
+// Разрешить просмотр предыдущих сообщений для новых учатсников чата (устраняет баг с peerChat)
+export function togglePreHistoryHidden({channel, enabled}) {
+    return api.call('channels.togglePreHistoryHidden', {
+        channel: channel,
+        enabled: enabled
+    })
+}
+
+// Управление параметром флуда (с каким интервалом отправлять сообщения)
+export function toggleSlowMode({channel, seconds}) {
+    return api.call('channels.toggleSlowMode', {
+        channel: channel,
+        seconds: seconds
+    })
+}
+
+// На всякий случай – метод для получения всех чатов
+export function getAllChats(except_ids) {
+    return api.call('messages.getAllChats', {
+        except_ids: except_ids
+    })
 }

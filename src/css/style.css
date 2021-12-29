@@ -16,7 +16,7 @@
 
 [dir=ltr]
 .vtelegram_validation_img {
-    background: url('chrome-extension://jhponoknfgpnkbdgofngcogaginpjkoe/res/images/finish_f.png') no-repeat 0 0;
+    background: url('chrome-extension://__MSG_@@extension_id__/res/images/finish_f.png') no-repeat 0 0;
 }
 
 [dir]
@@ -31,7 +31,7 @@
 
 [dir=ltr]
 .vtelegram_import_start_img {
-    background: url('chrome-extension://jhponoknfgpnkbdgofngcogaginpjkoe/res/images/chan.gif') no-repeat center;
+    background: url('chrome-extension://__MSG_@@extension_id__/res/images/chan.gif') no-repeat center;
     background-size: 160px, 160px;
 }
 

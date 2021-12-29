@@ -84,6 +84,7 @@ function createButton() {
             // console.log(users);
             // await TgLib.startImport(gChat, ExportLib.gImportedData.text);
 
+            // Lib.createFile(ExportLib.gImportedData.text, 'file.txt', 'plain/text');
             // await TgLib.runInterface(ExportLib.gImportedData.text);
 
             activeButton(exportButton, true);
